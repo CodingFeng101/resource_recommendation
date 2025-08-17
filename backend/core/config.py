@@ -32,8 +32,8 @@ class Settings(BaseSettings):
         return f"mysql+asyncmy://{self.mysql_user}:{self.mysql_password}@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
 
     # LLM API配置
-    api_key: str = Field(default="", description="OpenAI API密钥")
-    base_url: str = Field(default="https://api.openai.com/v1", description="OpenAI API基础URL")
+    api_key: str = Field(default="sk-CRj8WW9b6iNIsqqcB5F7Ce9d7e1c431b8e29Ea634aAa4e87", description="OpenAI API密钥")
+    base_url: str = Field(default="https://api.rcouyi.com/v1", description="OpenAI API基础URL")
     model: str = Field(default="gpt-4o", description="OpenAI模型名称")
     embedding_model: str = Field(default="text-embedding-3-small", description="OpenAI模型名称")
 

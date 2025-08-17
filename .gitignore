@@ -227,8 +227,8 @@ config/local.py
 # FastAPI specific
 .pytest_cache/
 
-# Machine learning models
-models/
+# Machine learning model
+backend/app/recommendation/model/
 *.model
 *.bin
 
