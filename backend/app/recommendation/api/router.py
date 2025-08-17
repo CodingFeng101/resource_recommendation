@@ -12,3 +12,4 @@ api_router.include_router(
     prefix="/v1",
     tags=["recommendation"]
 )
+
