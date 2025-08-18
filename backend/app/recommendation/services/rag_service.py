@@ -181,7 +181,7 @@ class RagService:
                 return []
             
             similarities = []
-            
+            similarity_threshold = 0.7
             # 3. 计算每个summary与查询的相似度
             for embedding in all_embeddings:
                 try:
@@ -191,6 +191,8 @@ class RagService:
                     
                     # 计算余弦相似度
                     similarity = float(cosine_similarity(query_vector, embedding_vector))
+                    if similarity < similarity_threshold:
+                        continue
                     similarities.append((embedding, similarity))
                     
                 except (json.JSONDecodeError, ValueError) as e:
