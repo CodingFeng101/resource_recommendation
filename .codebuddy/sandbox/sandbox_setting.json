@@ -1,20 +1,20 @@
 {
   "path": "d:\\PycharmProjects\\resource_recommendation",
   "desc": "这是一个基于FastAPI的智能资源推荐系统后端项目，提供资源推荐、数据分析、用户管理等功能，支持MySQL数据库和OpenAI API集成。",
-  "id": "5ba5da29116b4762889a6e005a4b1677",
+  "id": "85299901207a40cc907234b959089bfd",
   "data": {
-    "spaceKey": "5ba5da29116b4762889a6e005a4b1677",
+    "spaceKey": "85299901207a40cc907234b959089bfd",
     "connections": {
-      "webIDE": "https://5ba5da29116b4762889a6e005a4b1677.ap-singapore.cloudstudio.club",
-      "preview": "https://5ba5da29116b4762889a6e005a4b1677--{port}.ap-singapore.cloudstudio.club",
-      "api": "https://5ba5da29116b4762889a6e005a4b1677--api.ap-singapore.cloudstudio.club",
-      "pty": "https://5ba5da29116b4762889a6e005a4b1677--pty.ap-singapore.cloudstudio.club"
+      "webIDE": "https://85299901207a40cc907234b959089bfd.ap-singapore.cloudstudio.club",
+      "preview": "https://85299901207a40cc907234b959089bfd--{port}.ap-singapore.cloudstudio.club",
+      "api": "https://85299901207a40cc907234b959089bfd--api.ap-singapore.cloudstudio.club",
+      "pty": "https://85299901207a40cc907234b959089bfd--pty.ap-singapore.cloudstudio.club"
     }
   },
   "config": {
-    "api": "https://5ba5da29116b4762889a6e005a4b1677--api.ap-singapore.cloudstudio.club",
-    "pty": "https://5ba5da29116b4762889a6e005a4b1677--pty.ap-singapore.cloudstudio.club",
+    "api": "https://85299901207a40cc907234b959089bfd--api.ap-singapore.cloudstudio.club",
+    "pty": "https://85299901207a40cc907234b959089bfd--pty.ap-singapore.cloudstudio.club",
     "region": "ap-shanghai",
-    "spaceKey": "5ba5da29116b4762889a6e005a4b1677"
+    "spaceKey": "85299901207a40cc907234b959089bfd"
   }
 }
