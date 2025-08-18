@@ -44,7 +44,7 @@ CREATE TABLE `courses` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `courses`
+-- Dumping data.txt for table `courses`
 --
 
 LOCK TABLES `courses` WRITE;
@@ -72,7 +72,7 @@ CREATE TABLE `report_embeddings` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `report_embeddings`
+-- Dumping data.txt for table `report_embeddings`
 --
 
 LOCK TABLES `report_embeddings` WRITE;
@@ -104,7 +104,7 @@ CREATE TABLE `reports` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `reports`
+-- Dumping data.txt for table `reports`
 --
 
 LOCK TABLES `reports` WRITE;
@@ -132,7 +132,7 @@ CREATE TABLE `summary_embeddings` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `summary_embeddings`
+-- Dumping data.txt for table `summary_embeddings`
 --
 
 LOCK TABLES `summary_embeddings` WRITE;
@@ -160,7 +160,7 @@ CREATE TABLE `video_summaries` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `video_summaries`
+-- Dumping data.txt for table `video_summaries`
 --
 
 LOCK TABLES `video_summaries` WRITE;

@@ -154,16 +154,17 @@ class RagService:
                             await report_embedding_dao.create_async(db, obj_in=report_embedding_create)
 
     @staticmethod
-    async def ask_recommendation(*, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    async def ask_recommendation(*, query: str, top_k: int = 3) -> List[Dict[str, Any]]:
         """
-        根据查询向量从summary_embeddings表中检索最相似的top_k个summary，并返回对应的完整课程信息
+        根据查询向量从summary_embeddings表中检索最相似的top_k个summary，并返回对应的完整课程信息，
+        同时包含每个课程最相似的报告信息
         
         Args:
             query: 用户查询字符串
             top_k: 返回的最相似课程数量
             
         Returns:
-            包含完整课程信息的列表，按相似度排序
+            包含完整课程信息和最相似报告信息的列表，按相似度排序
         """
         
         llm = GenericResponseGetter()
@@ -201,7 +202,7 @@ class RagService:
             
             results = []
             
-            # 5. 获取对应的课程信息
+            # 5. 获取对应的课程信息和最相似的报告
             for embedding, similarity in top_k_embeddings:
                 try:
                     # 获取video_summary
@@ -214,8 +215,61 @@ class RagService:
                     if not course:
                         continue
                     
-                    # 构建完整的课程信息
+                    # 获取该课程的所有报告
+                    reports = await report_dao.get_by_course_uuid_async(db, course_uuid=course.uuid)
+                    
+                    # 计算所有报告的相似度，找出最相似的一个
+                    report_similarities = []
+                    
+                    for report in reports:
+                        # 获取对应的report_embedding
+                        report_embeddings = await report_embedding_dao.get_by_report_uuid_async(db, report_uuid=report.uuid)
+                        
+                        if not report_embeddings:
+                            continue
+                        
+                        # 可能有多个embedding，取第一个
+                        report_embedding = report_embeddings[0] if report_embeddings else None
+                        if not report_embedding:
+                            continue
+                        
+                        try:
+                            # 解析存储的向量字符串
+                            vector_data = json.loads(report_embedding.vector)
+                            report_vector = np.array(vector_data, dtype=np.float32).reshape(1, -1)
+                            
+                            # 计算余弦相似度
+                            report_similarity = float(cosine_similarity(query_vector, report_vector))
+                            
+                            # 记录所有报告的相似度
+                            report_similarities.append({
+                                "report": report,
+                                "similarity": report_similarity
+                            })
+                        
+                        except (json.JSONDecodeError, ValueError) as e:
+                            continue
+                    
+                    # 找出相似度最高的报告
+                    best_report = None
+                    if report_similarities:
+                        # 按相似度排序，取最高的
+                        report_similarities.sort(key=lambda x: x["similarity"], reverse=True)
+                        top_report = report_similarities[0]
+                        
+                        best_report = {
+                            "report_uuid": top_report["report"].uuid,
+                            "start_time": top_report["report"].start_time,
+                            "end_time": top_report["report"].end_time,
+                            "duration": top_report["report"].duration,
+                            "segment_topic": top_report["report"].segment_topic,
+                            "key_points": top_report["report"].key_points,
+                            "similarity_score": top_report["similarity"]
+                        }
+                    
+                    # 构建完整的课程信息，包含最相似的报告
                     course_info = {
+                        "course_uuid": course.uuid,
                         "course_id": course.course_id,
                         "resource_name": course.resource_name,
                         "file_name": course.file_name,
@@ -226,6 +280,8 @@ class RagService:
                         "learning_style_preference": course.learning_style_preference,
                         "knowledge_level_self_assessment": course.knowledge_level_self_assessment,
                         "video_summary": video_summary.video_summary,
+                        "start_time": best_report.get("start_time") if best_report else None,
+                        "end_time": best_report.get("end_time") if best_report else None,
                     }
                     
                     results.append(course_info)
@@ -267,7 +323,7 @@ class RagService:
                 return []
             
             similarities = []
-            
+            similarity_threshold = 0.7
             # 4. 计算每个报告的embedding与查询的相似度
             for report in reports:
                 # 获取对应的report_embedding
@@ -288,7 +344,8 @@ class RagService:
                     
                     # 计算余弦相似度
                     similarity = float(cosine_similarity(query_vector, embedding_vector))
-                    
+                    if similarity < similarity_threshold:
+                        continue
                     # 构建报告信息
                     report_info = {
                         "report_uuid": str(report.uuid),
@@ -308,5 +365,6 @@ class RagService:
             # 5. 按相似度排序并返回top_k
             similarities.sort(key=lambda x: x["similarity_score"], reverse=True)
             return similarities[:top_k]
+
 
 rag_service = RagService()

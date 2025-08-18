@@ -15,7 +15,7 @@ async def process_course_data(data: List[Dict[str, Any]]) -> Dict[str, Any]:
         return {
             "code": 200,
             "msg": "处理完成",
-            "data": result
+            "data.txt": result
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -33,7 +33,7 @@ async def search_similar_courses(query: str = Query(..., description="搜索查�
         return {
             "code": 200,
             "msg": "搜索完成",
-            "data": results
+            "data.txt": results
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -58,7 +58,7 @@ async def search_similar_reports(
         return {
             "code": 200,
             "msg": "搜索完成",
-            "data": results
+            "data.txt": results
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

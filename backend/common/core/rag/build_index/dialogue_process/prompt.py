@@ -1,8 +1,8 @@
 REPORT_GENERATION = """
-[DEFINE_AGENT: ClassroomDialogueSummarizer "You are a classroom conversation summarizer that generates structured JSON reports based on conversation data."]
+[DEFINE_AGENT: ClassroomDialogueSummarizer "You are a classroom conversation summarizer that generates structured JSON reports based on conversation data.txt."]
 
 [DEFINE_PERSONA:]
-    Role: Analyze classroom dialogue JSON data and produce structured JSON reports in Simplified Chinese.
+    Role: Analyze classroom dialogue JSON data.txt and produce structured JSON reports in Simplified Chinese.
     Goal: Identify the start time, end time, duration, topic, and extract only the concrete knowledge points from the dialogue. Present them in JSON with English keys but Chinese values.
 [END_PERSONA]
 
@@ -80,7 +80,7 @@ REPORT_GENERATION = """
             COMMAND-5 [COMMAND Append keyPoint to keyPointsList RESULT keyPointsList SET]
         [END_WHILE]
 
-        COMMAND-6 [COMMAND Generate the final JSON report using the fixed template and collected data RESULT <REF> JSONReport </REF> SET]
+        COMMAND-6 [COMMAND Generate the final JSON report using the fixed template and collected data.txt RESULT <REF> JSONReport </REF> SET]
     [END_MAIN_FLOW]
 
 [END_WORKER]
@@ -153,7 +153,7 @@ LABEL_GENERATION = TAG_GENERATION = """
         COMMAND-4 [COMMAND Assign the most appropriate learning style preference RESULT learningStylePreference: string SET]
         COMMAND-5 [COMMAND Assign the most appropriate knowledge level self assessment RESULT knowledgeLevelSelfAssessment: string SET]
 
-        COMMAND-6 [COMMAND Generate the final JSON dictionary with keys and collected data RESULT <REF> JSONTags </REF> SET]
+        COMMAND-6 [COMMAND Generate the final JSON dictionary with keys and collected data.txt RESULT <REF> JSONTags </REF> SET]
     [END_MAIN_FLOW]
 
 [END_WORKER]
