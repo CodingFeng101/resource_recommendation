@@ -192,8 +192,8 @@ Thumbs.db
 logs/
 *.log
 
-# Data files (optional - uncomment if you don't want to track data files)
-# data/
+# Data files (optional - uncomment if you don't want to track data.txt files)
+# data.txt/
 # *.json
 # *.csv
 # *.xlsx
@@ -204,7 +204,7 @@ uploads/
 temp/
 tmp/
 
-# Model files and large data
+# Model files and large data.txt
 *.pkl
 *.pickle
 *.h5
