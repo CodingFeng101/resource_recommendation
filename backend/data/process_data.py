@@ -220,5 +220,16 @@ def main():
         extract_dialogues=False     # 关键：False 表示不再提取
     )
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
+import json
+
+with open("merged_dialogues.json", "r", encoding="utf-8") as f:
+    merged_dialogues = json.load(f)
+dialogue_list = []
+# 取前 10 个对话
+for dialogue in merged_dialogues[100:]:
+    dialogue_list.append(dialogue)
+
+with open("merged_dialogue.json", "w", encoding="utf-8") as f:
+    json.dump(dialogue_list, f, ensure_ascii=False)

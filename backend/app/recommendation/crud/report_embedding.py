@@ -5,7 +5,7 @@ from typing import List, Optional
 from uuid import UUID
 import json
 
-from ..model.report_embedding import ReportEmbedding
+from ..model.model import ReportEmbedding
 from ..schema.report_embedding import ReportEmbeddingCreate, ReportEmbeddingResponse
 
 class CRUDReportEmbedding:

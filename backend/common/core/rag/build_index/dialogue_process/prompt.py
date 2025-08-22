@@ -89,7 +89,7 @@ REPORT_GENERATION = """
 """
 
 
-LABEL_GENERATION = TAG_GENERATION = """
+LABEL_GENERATION = """
 [DEFINE_AGENT: ClassroomTagGenerator "You are a classroom tag generation assistant that produces summaries and learning-related metadata from a list of segment topics."]
 
 [DEFINE_PERSONA:]

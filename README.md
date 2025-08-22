@@ -36,26 +36,97 @@ backend/
 ├── app/
 │   └── recommendation/
 │       ├── api/              # API路由层
+│       │   ├── router.py     # 主路由配置
 │       │   └── v1/
 │       │       └── recommendation/
-│       ├── crud/             # 数据访问层
-│       ├── model/            # 数据库模型
-│       ├── schema/           # 数据验证schema
+│       │           └── rag_api.py  # RAG相关API端点
+│       ├── crud/             # 数据访问层 (CRUD操作)
+│       │   ├── course.py     # 课程数据操作
+│       │   ├── report.py     # 报告数据操作
+│       │   ├── video_summary.py  # 视频摘要数据操作
+│       │   ├── report_embedding.py  # 报告向量数据操作
+│       │   └── summary_embedding.py # 摘要向量数据操作
+│       ├── model/            # SQLAlchemy数据库模型
+│       │   ├── base.py       # 基础模型类
+│       │   ├── course.py     # 课程模型
+│       │   ├── report.py     # 报告模型
+│       │   ├── video_summary.py    # 视频摘要模型
+│       │   ├── report_embedding.py # 报告向量模型
+│       │   └── summary_embedding.py # 摘要向量模型
+│       ├── schema/           # Pydantic数据验证模型
+│       │   ├── course.py     # 课程数据模型
+│       │   ├── report.py     # 报告数据模型
+│       │   ├── video_summary.py    # 视频摘要数据模型
+│       │   ├── report_embedding.py # 报告向量数据模型
+│       │   └── summary_embedding.py # 摘要向量数据模型
 │       └── services/         # 业务逻辑层
+│           ├── course_service.py    # 课程业务逻辑
+│           ├── report_service.py    # 报告业务逻辑
+│           ├── video_summary_service.py # 视频摘要业务逻辑
+│           ├── report_embedding_service.py # 报告向量业务逻辑
+│           ├── summary_embedding_service.py # 摘要向量业务逻辑
+│           └── rag_service.py       # RAG核心服务
 ├── common/                   # 公共组件
+│   └── core/
+│       └── rag/              # RAG核心组件
+│           └── retrieval/    # 检索相关组件
 ├── core/                     # 核心配置
 ├── database/                 # 数据库配置
-└── data/                     # 数据处理工具
+│   └── db_mysql.py          # MySQL数据库连接配置
+└── main.py                   # FastAPI应用入口
 ```
 
 ## 📋 数据模型
 
 ### 核心实体
-- **Course**: 课程基本信息
-- **VideoSummary**: 视频摘要信息
-- **Report**: 学习报告详情
-- **ReportEmbedding**: 报告的向量表示
-- **SummaryEmbedding**: 摘要的向量表示
+
+#### Course (课程表)
+- **uuid**: 课程唯一标识符 (主键)
+- **course_id**: 课程ID (唯一索引)
+- **resource_name**: 资源名称
+- **file_name**: 文件名
+- **grade**: 年级 (索引)
+- **subject**: 学科 (索引)
+- **video_link**: 视频链接 (可选)
+- **learning_objectives**: 学习目标 (可选)
+- **learning_style_preference**: 学习方式偏好 (可选)
+- **knowledge_level_self_assessment**: 知识掌握程度自评 (可选)
+- **dialogue**: 课程对话数据 (JSON格式)
+- **created_at/updated_at**: 创建/更新时间
+
+#### VideoSummary (视频摘要表)
+- **uuid**: 摘要唯一标识符 (主键)
+- **course_uuid**: 关联课程UUID (外键)
+- **video_summary**: 视频摘要内容
+- **created_at**: 创建时间
+
+#### Report (学习报告表)
+- **uuid**: 报告唯一标识符 (主键)
+- **course_uuid**: 关联课程UUID (外键)
+- **start_time**: 开始时间
+- **end_time**: 结束时间
+- **duration**: 持续时间
+- **segment_topic**: 段落主题
+- **key_points**: 关键点列表 (JSON格式)
+- **created_at**: 创建时间
+
+#### ReportEmbedding (报告向量表)
+- **uuid**: 向量唯一标识符 (主键)
+- **vector**: 向量数据 (JSON字符串格式)
+- **report_uuid**: 关联报告UUID (外键)
+- **created_at**: 创建时间
+
+#### SummaryEmbedding (摘要向量表)
+- **uuid**: 向量唯一标识符 (主键)
+- **vector**: 向量数据 (JSON字符串格式)
+- **video_summary_uuid**: 关联视频摘要UUID (外键)
+- **created_at**: 创建时间
+
+### 数据关系
+- Course → VideoSummary (一对多)
+- Course → Report (一对多)
+- VideoSummary → SummaryEmbedding (一对多)
+- Report → ReportEmbedding (一对多)
 
 ## 🚀 快速开始
 
@@ -63,33 +134,79 @@ backend/
 - Python 3.8+
 - MySQL 8.0+
 - Redis (可选，用于缓存)
+- Docker & Docker Compose (推荐)
 
-### 安装步骤
+### 部署方式
 
-1. **克隆项目**
+#### 🐳 方式一：Docker部署（推荐）
+
+**1. 克隆项目**
 ```bash
 git clone [项目地址]
 cd resource_recommendation/backend
 ```
 
-2. **创建虚拟环境**
-```bash
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-```
-
-3. **安装依赖**
-```bash
-pip install -r requirements.txt
-```
-
-4. **环境配置**
+**2. 配置环境变量**
 ```bash
 cp .env.example .env
 # 编辑 .env 文件，配置数据库连接等信息
 ```
 
-5. **数据库初始化**
+**3. 一键启动**
+```bash
+# 使用 Docker Compose 启动所有服务（包含MySQL数据库）
+docker-compose up -d
+
+# 查看服务状态
+docker-compose ps
+
+# 查看日志
+docker-compose logs -f backend
+```
+
+**4. 验证部署**
+```bash
+# 检查健康状态
+curl http://localhost:8000/health
+
+# 测试课程推荐API
+curl "http://localhost:8000/api/v1/recommendation/rag/search/courses?query=机器学习"
+
+# 测试批量处理API
+curl -X POST "http://localhost:8000/api/v1/recommendation/rag/process" \
+  -H "Content-Type: application/json" \
+  -d '[{"course_id":"test-001","resource_name":"测试课程","file_name":"test.mp4","grade":"高中","subject":"信息技术","dialogue":[]}]'
+
+# 访问API文档
+open http://localhost:8000/docs
+```
+
+#### 🔧 方式二：本地开发部署
+
+**1. 克隆项目**
+```bash
+git clone [项目地址]
+cd resource_recommendation/backend
+```
+
+**2. 创建虚拟环境**
+```bash
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+```
+
+**3. 安装依赖**
+```bash
+pip install -r requirements.txt
+```
+
+**4. 环境配置**
+```bash
+cp .env.example .env
+# 编辑 .env 文件，配置数据库连接等信息
+```
+
+**5. 数据库初始化**
 ```bash
 # 创建数据库
 mysql -u root -p < sql/init.sql
@@ -98,13 +215,115 @@ mysql -u root -p < sql/init.sql
 alembic upgrade head
 ```
 
-6. **启动服务**
+**6. 启动服务**
 ```bash
 # 开发模式
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 # 生产模式
 uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+## 🐳 Docker部署详解
+
+### 镜像优化特性
+- **轻量级**: 基于Alpine Linux，镜像大小仅~200MB
+- **快速构建**: 使用国内镜像源，构建时间缩短至1-2分钟
+- **安全**: 非root用户运行，提升容器安全性
+- **健康检查**: 内置健康检查机制，确保服务稳定
+
+### 服务架构
+```
+┌─────────────────┐    ┌─────────────────┐
+│   Backend API   │    │     MySQL       │
+│   (Port 8000)   │◄──►│   (Port 3306)   │
+│   FastAPI       │    │   MySQL 8.0     │
+└─────────────────┘    └─────────────────┘
+```
+
+### 常用Docker命令
+
+**启动服务**
+```bash
+# 启动所有服务
+docker-compose up -d
+
+# 重新构建并启动
+docker-compose up -d --build
+
+# 指定服务启动
+docker-compose up -d backend
+```
+
+**查看状态**
+```bash
+# 查看服务状态
+docker-compose ps
+
+# 查看实时日志
+docker-compose logs -f
+
+# 查看特定服务日志
+docker-compose logs -f backend
+```
+
+**维护操作**
+```bash
+# 停止服务
+docker-compose down
+
+# 停止并删除数据卷
+docker-compose down -v
+
+# 进入容器
+docker-compose exec backend sh
+
+# 查看容器内部文件
+docker-compose exec backend ls -la /app/backend/
+```
+
+### 故障排查
+
+**构建失败**
+- 检查Dockerfile语法
+- 确认网络连接正常（国内用户已配置阿里云镜像）
+- 查看详细错误日志: `docker-compose logs backend`
+
+**服务启动失败**
+- 检查端口占用: `netstat -tulnp | grep 8000`
+- 验证数据库连接: `docker-compose exec backend python -c "import mysql.connector"`
+- 查看健康检查: `curl http://localhost:8000/health`
+
+### 性能对比
+
+| 指标 | 传统部署 | Docker部署 |
+|------|----------|------------|
+| 镜像大小 | - | ~200MB |
+| 构建时间 | 5-10分钟 | 1-2分钟 |
+| 启动时间 | 手动配置 | 30秒 |
+| 环境一致性 | 低 | 高 |
+| 扩展性 | 复杂 | 简单 |
+
+### 环境变量配置
+
+创建 `.env` 文件，配置以下关键参数：
+
+```bash
+# 数据库配置
+MYSQL_ROOT_PASSWORD=your_root_password
+MYSQL_DATABASE=resource_recommendation
+MYSQL_USER=appuser
+MYSQL_PASSWORD=your_app_password
+
+# 应用配置
+DATABASE_URL=mysql+pymysql://appuser:your_app_password@mysql:3306/resource_recommendation
+DEBUG=False
+HOST=0.0.0.0
+PORT=8000
+
+# 安全配置
+SECRET_KEY=your-secret-key-here
+ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
 ## 📖 API文档
@@ -146,11 +365,11 @@ GET /api/v1/recommendation/rag/search/courses?query={查询字符串}&top_k={数
 
 #### 2. 报告语义搜索
 ```http
-GET /api/v1/recommendation/rag/search/reports/{course_id}?query={查询字符串}&top_k={数量}
+GET /api/v1/recommendation/rag/search/reports/{course_uuid}?query={查询字符串}&top_k={数量}
 ```
 
 **参数说明**:
-- `course_id`: 课程ID（路径参数）
+- `course_uuid`: 课程UUID（路径参数）
 - `query`: 搜索关键词（必填）
 - `top_k`: 返回结果数量，默认5，最大20
 
@@ -169,6 +388,7 @@ GET /api/v1/recommendation/rag/search/reports/{course_id}?query={查询字符串
       "key_points": ["损失函数", "梯度下降", "参数优化"],
       "similarity_score": 0.92,
       "course_info": {
+        "course_uuid": "uuid-string",
         "course_id": "course-001",
         "resource_name": "机器学习基础"
       }
@@ -191,15 +411,38 @@ POST /api/v1/recommendation/rag/process
     "file_name": "ml-basics.mp4",
     "grade": "高中",
     "subject": "信息技术",
+    "video_link": "https://example.com/video.mp4",
+    "learning_objectives": "掌握机器学习基本概念和算法",
+    "learning_style_preference": "视觉学习",
+    "knowledge_level_self_assessment": "初学者",
     "dialogue": [
       {
         "timestamp": "00:00:00",
         "speaker": "老师",
         "text": "今天我们开始学习机器学习"
+      },
+      {
+        "timestamp": "00:01:30",
+        "speaker": "老师",
+        "text": "机器学习是人工智能的一个重要分支"
       }
     ]
   }
 ]
+```
+
+**响应示例**:
+```json
+{
+  "code": 200,
+  "msg": "处理完成",
+  "data": {
+    "processed_courses": 1,
+    "created_summaries": 1,
+    "created_reports": 5,
+    "created_embeddings": 6
+  }
+}
 ```
 
 ## 🔧 配置说明
@@ -207,16 +450,28 @@ POST /api/v1/recommendation/rag/process
 ### 环境变量 (.env)
 ```bash
 # 数据库配置
-DATABASE_URL=mysql+aiomysql://user:password@localhost:3306/education_db
+DATABASE_URL=mysql+aiomysql://root:123456@mysql:3306/education_db
+DATABASE_URL_SYNC=mysql+pymysql://root:123456@mysql:3306/education_db
 
-# LLM配置
+# LLM配置 (OpenAI兼容)
 LLM_API_KEY=your-api-key
 LLM_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=gpt-3.5-turbo
 EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_API_KEY=your-embedding-api-key
+EMBEDDING_BASE_URL=https://api.openai.com/v1
 
 # 应用配置
 DEBUG=True
 LOG_LEVEL=INFO
+APP_HOST=0.0.0.0
+APP_PORT=8000
+
+# MySQL配置 (Docker环境)
+MYSQL_ROOT_PASSWORD=123456
+MYSQL_DATABASE=education_db
+MYSQL_USER=app_user
+MYSQL_PASSWORD=app_password
 ```
 
 ## 📊 数据导入

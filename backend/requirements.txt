@@ -2,6 +2,7 @@ annotated-types==0.7.0
 anyio==4.10.0
 asyncmy==0.2.10
 certifi==2025.8.3
+cryptography==43.0.3
 click==8.2.1
 colorama==0.4.6
 distro==1.9.0
@@ -39,3 +40,4 @@ typing-inspection==0.4.1
 typing_extensions==4.14.1
 tzdata==2025.2
 uvicorn==0.35.0
+

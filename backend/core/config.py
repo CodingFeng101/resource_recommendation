@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-from typing import Optional, List
+from typing import Optional, List, Union
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
@@ -25,16 +25,21 @@ class Settings(BaseSettings):
     mysql_user: str = Field(default="root", description="MySQL用户名")
     mysql_password: str = Field(default="12345678", description="MySQL密码")
     mysql_database: str = Field(default="resource_recommendation", description="MySQL数据库名")
+    database_url_env: Optional[str] = Field(default=None, description="数据库URL环境变量")
 
     # 构建完整的数据库URL
     @property
     def database_url(self) -> str:
+        # 如果是docker环境，优先使用环境变量中的DATABASE_URL_ENV
+        if self.environment == "docker" and self.database_url_env:
+            return self.database_url_env
+        # 否则使用分开的配置项构建URL
         return f"mysql+asyncmy://{self.mysql_user}:{self.mysql_password}@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}"
 
     # LLM API配置
-    api_key: str = Field(default="sk-CRj8WW9b6iNIsqqcB5F7Ce9d7e1c431b8e29Ea634aAa4e87", description="OpenAI API密钥")
-    base_url: str = Field(default="https://api.rcouyi.com/v1", description="OpenAI API基础URL")
-    model: str = Field(default="gpt-4o", description="OpenAI模型名称")
+    api_key: str = Field(default="", description="OpenAI API密钥")
+    base_url: str = Field(default="http://106.227.68.83:8000", description="OpenAI API基础URL")
+    model: str = Field(default="qwen2.5-32b", description="OpenAI模型名称")
     embedding_model: str = Field(default="text-embedding-3-small", description="OpenAI模型名称")
 
     # 日志配置

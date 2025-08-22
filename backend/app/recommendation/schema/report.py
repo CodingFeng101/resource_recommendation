@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import datetime
 
 class ReportBase(BaseModel):
-    course_uuid: UUID = Field(..., description="关联的课程UUID")
+    course_uuid: str = Field(..., description="关联的课程UUID")
     start_time: str = Field(..., description="开始时间")
     end_time: str = Field(..., description="结束时间")
     duration: str = Field(..., description="持续时间")

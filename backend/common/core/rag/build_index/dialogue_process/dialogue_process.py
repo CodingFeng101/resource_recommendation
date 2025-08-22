@@ -12,7 +12,7 @@ from .prompt import REPORT_GENERATION, LABEL_GENERATION
 class DialogueProcessor:
     def __init__(self):
         self.llm = GenericResponseGetter()
-        self.sem = asyncio.Semaphore(30)
+        self.sem = asyncio.Semaphore(15)
 
     @staticmethod
     def chunk_with_overlap(dialogue, chunk_size=20, overlap=5):
@@ -26,7 +26,6 @@ class DialogueProcessor:
                 agent_query = template.render(dialogue_data=json.dumps(chunk))
                 report = await self.llm.get_response(query=agent_query)
                 cleaned_report = clean_json_output(report)
-                print("report:", cleaned_report)
                 try:
                     return json.loads(cleaned_report)
                 except json.JSONDecodeError:
@@ -54,13 +53,15 @@ class DialogueProcessor:
     async def label_generate(self, report_list):
         segment_topic_list = [report["segment_topic"] for report in report_list]
         template = Template(LABEL_GENERATION)
-        agent_query = template.render(segment_topic=json.dumps(json.dumps(segment_topic_list)))
+        agent_query = template.render(segment_topic_list=json.dumps(segment_topic_list))
         label = await self.llm.get_response(query=agent_query)
         return json.loads(clean_json_output(label))
 
     async def label_embedding(self, label):
-        print("label:", label)
-        summary_embedding = await self.llm.get_vector(query=label.get("class_summary", "无"))
+        class_summary = label["class_summary"]
+        if not class_summary:
+            class_summary = "无可用信息"
+        summary_embedding = await self.llm.get_vector(query=class_summary)
         label["summary_embedding"] = summary_embedding
         return label
 
@@ -72,3 +73,13 @@ class DialogueProcessor:
         label = await self.label_generate(report_list=report_list)
         label_with_embedding = await self.label_embedding(label=label)
         return {"report_with_embedding": report_with_embedding, "label_with_embedding": label_with_embedding}
+
+async def main():
+    with open(r"D:\PycharmProjects\resource_recommendation\backend\data\data.txt", "r", encoding="utf-8") as f:
+        dialogues = json.load(f)
+    processor = DialogueProcessor()
+    report = await processor.process(dialogues)
+    print(report)
+
+if __name__ == "__main__":
+    asyncio.run(main())
