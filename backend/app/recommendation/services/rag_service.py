@@ -51,6 +51,7 @@ class RagService:
         
         for index, item in enumerate(course_data):
             try:
+                print("已完成:", index)
                 await service._process_single_course(item)
                 results["processed_items"] += 1
             except Exception as e:
@@ -60,9 +61,9 @@ class RagService:
                     "error": str(e),
                     "course_id": str(item.get("course_id", "unknown"))
                 })
-        
+
         return results
-    
+
     async def _process_single_course(self, item: Dict[str, Any]) -> None:
         """处理单个课程数据"""
         course_id = item.get("course_id")
@@ -72,14 +73,8 @@ class RagService:
         subject = item.get("subject")
         video_link = item.get("video_link")
         dialogue = item.get("dialogue", [])
-        
+
         async with async_db_session.begin() as db:
-            # 检查课程是否已存在
-            existing_course = await course_dao.get_by_course_id_async(db, course_id=course_id)
-            if existing_course:
-                raise errors.ForbiddenError(msg=f'课程ID {course_id} 已存在')
-            
-            # 创建课程记录（learning_objectives等三个字段初始为空）
             course_create = CourseCreate(
                 course_id=course_id,
                 resource_name=resource_name,
@@ -92,14 +87,13 @@ class RagService:
                 learning_style_preference=None,
                 knowledge_level_self_assessment=None
             )
-            
+
             course = await course_dao.create_async(db, obj_in=course_create)
             course_uuid = course.uuid
-            
+
             # 处理对话数据
             if dialogue:
                 processed_result = await self.dialogue_processor.process(dialogue)
-                
                 # 从label_with_embedding中提取字段更新course表
                 if processed_result.get("label_with_embedding"):
                     labels = processed_result["label_with_embedding"]
@@ -113,14 +107,14 @@ class RagService:
                 # 处理label_with_embedding中的summary和summary_embedding，分别存入video_summary和summary_embedding表
                 if processed_result.get("label_with_embedding"):
                     label_data = processed_result["label_with_embedding"]
-                    
+
                     if "class_summary" in label_data:
                         video_summary_create = VideoSummaryCreate(
                             course_uuid=course_uuid,
                             video_summary=label_data["class_summary"]
                         )
                         video_summary = await video_summary_dao.create_async(db, obj_in=video_summary_create)
-                        
+
                         # 将summary_embedding存入summary_embedding表
                         if "summary_embedding" in label_data:
                             embedding_create = SummaryEmbeddingCreate(
@@ -132,7 +126,7 @@ class RagService:
                 # 处理report_with_embedding数据，存入report和report_embedding表
                 if processed_result.get("report_with_embedding"):
                     reports = processed_result["report_with_embedding"]
-                    
+
                     for report_data in reports:
                         # 将report数据存入report表
                         report_create = ReportCreate(
@@ -144,7 +138,7 @@ class RagService:
                             key_points=report_data.get("key_points")
                         )
                         report = await report_dao.create_async(db, obj_in=report_create)
-                        
+
                         # 将report_embedding存入report_embedding表
                         if "segment_topic_embedding" in report_data:
                             report_embedding_create = ReportEmbeddingCreate(

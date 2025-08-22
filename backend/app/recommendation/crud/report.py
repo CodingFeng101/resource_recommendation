@@ -4,7 +4,7 @@ from sqlalchemy import select
 from typing import List, Optional
 from uuid import UUID
 
-from ..model.report import Report
+from ..model.model import Report
 from ..schema.report import ReportCreate, ReportUpdate
 
 class CRUDReport:

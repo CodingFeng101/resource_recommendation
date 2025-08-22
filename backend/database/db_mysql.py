@@ -3,8 +3,9 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+
+from backend.app.recommendation.model.model import Base
 from backend.core.config import settings
-from backend.app.recommendation.model.base import Base
 
 # 异步数据库引擎（MySQL）
 async_engine = create_async_engine(
@@ -12,6 +13,7 @@ async_engine = create_async_engine(
     echo=settings.debug,
     pool_pre_ping=True,
     pool_recycle=300,
+    connect_args={"ssl": False},  # 禁用SSL连接
 )
 
 # 异步会话工厂

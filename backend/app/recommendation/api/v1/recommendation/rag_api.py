@@ -15,25 +15,26 @@ async def process_course_data(data: List[Dict[str, Any]]) -> Dict[str, Any]:
         return {
             "code": 200,
             "msg": "处理完成",
-            "data.txt": result
+            "data": result
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @rag_router.get("/search/courses", summary="根据查询搜索相似课程")
-async def search_similar_courses(query: str = Query(..., description="搜索查询字符串")) -> Dict[str, Any]:
+async def search_similar_courses(query: str = Query(..., description="搜索查询字符串"),
+                                 top_k: int = Query(..., description="top-k")) -> Dict[str, Any]:
     """
     根据用户查询字符串搜索最相似的课程
     
     - **query**: 用户输入的搜索查询
     """
     try:
-        results = await rag_service.ask_recommendation(query=query)
+        results = await rag_service.ask_recommendation(query=query, top_k=top_k)
         return {
             "code": 200,
             "msg": "搜索完成",
-            "data.txt": results
+            "data": results
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -43,6 +44,7 @@ async def search_similar_courses(query: str = Query(..., description="搜索查�
 async def search_similar_reports(
     course_uuid: str,
     query: str = Query(..., description="搜索查询字符串"),
+    top_k: int = Query(..., description="top-k")
 ) -> Dict[str, Any]:
     """
     根据课程ID和查询字符串搜索该课程下最相似的报告
@@ -53,12 +55,13 @@ async def search_similar_reports(
     try:
         results = await rag_service.ask_resource(
             course_uuid=course_uuid,
-            query=query
+            query=query,
+            top_k=top_k
         )
         return {
             "code": 200,
             "msg": "搜索完成",
-            "data.txt": results
+            "data": results
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

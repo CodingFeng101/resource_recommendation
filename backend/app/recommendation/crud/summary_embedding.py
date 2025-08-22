@@ -5,7 +5,7 @@ from typing import List, Optional
 from uuid import UUID
 import json
 
-from ..model.summary_embedding import SummaryEmbedding
+from ..model.model import SummaryEmbedding
 from ..schema.summary_embedding import SummaryEmbeddingCreate, SummaryEmbeddingResponse
 
 class CRUDSummaryEmbedding:

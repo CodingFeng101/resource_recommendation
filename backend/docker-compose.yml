@@ -9,6 +9,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
       MYSQL_DATABASE: resource_recommendation
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
     ports:
       - "13306:3306"
     volumes:
@@ -16,6 +18,13 @@ services:
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - backend_network
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p12345678"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   # 后端服务
   backend:
@@ -27,14 +36,21 @@ services:
     ports:
       - "8082:8000"
     environment:
-      - DATABASE_URL=mysql+pymysql://appuser:apppassword@mysql:13306/resource_recommendation
+      - DATABASE_URL_ENV=mysql+asyncmy://appuser:apppassword@mysql:3306/resource_recommendation
       - ENVIRONMENT=docker
+      - PYTHONPATH=/app
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     volumes:
       - ./logs:/app/logs
     networks:
       - backend_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   mysql_data:

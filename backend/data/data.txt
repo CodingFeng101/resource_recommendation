@@ -1,12 +1,4 @@
 [
-  {
-    "course_id": "1837021142472429574",
-    "resource_name": "初中初二下数学",
-    "file_name": "二次根式（一）二次根式的定义",
-    "grade": "八年级",
-    "subject": "数学",
-    "video_link": "https://vod.jxeduyun.com/view/G8/SX/RJB/20200211/G8_SX_RJB_20200211_2816b04dac424d1db4885e362b5266dd.mp4",
-    "dialogue": [
       {
         "start": 9.51,
         "end": 10.29,
@@ -1760,5 +1752,4 @@
         "text": "谢谢大家。"
       }
     ]
-  }
-  ]
+
