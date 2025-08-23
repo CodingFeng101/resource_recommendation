@@ -4,7 +4,7 @@ from sqlalchemy import select
 from typing import List, Optional
 from uuid import UUID
 
-from ..model.model import Course
+from backend.app.recommendation.model import Course
 from ..schema.course import CourseCreate, CourseUpdate
 
 class CRUDCourse:

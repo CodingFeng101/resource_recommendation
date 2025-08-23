@@ -4,7 +4,7 @@ from sqlalchemy import select
 from typing import List, Optional
 from uuid import UUID
 
-from ..model.model import VideoSummary
+from backend.app.recommendation.model import VideoSummary
 from ..schema.video_summary import VideoSummaryCreate, VideoSummaryUpdate
 
 class CRUDVideoSummary:
