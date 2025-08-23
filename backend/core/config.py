@@ -38,8 +38,9 @@ class Settings(BaseSettings):
 
     # LLM API配置
     api_key: str = Field(default="", description="OpenAI API密钥")
-    base_url: str = Field(default="http://106.227.68.83:8000", description="OpenAI API基础URL")
-    model: str = Field(default="qwen2.5-32b", description="OpenAI模型名称")
+    # base_url: str = Field(default="http://106.227.68.83:8000", description="OpenAI API基础URL")
+    base_url: str = Field(default="https://api.rcouyi.com/v1", description="OpenAI API基础URL")
+    model: str = Field(default="gpt-4o", description="OpenAI模型名称")
     embedding_model: str = Field(default="text-embedding-3-small", description="OpenAI模型名称")
 
     # 日志配置

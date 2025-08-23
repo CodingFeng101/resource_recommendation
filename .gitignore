@@ -228,8 +228,6 @@ config/local.py
 .pytest_cache/
 
 # Machine learning model
-backend/app/recommendation/model/
-*.model
 *.bin
 
 # Backup files
@@ -240,3 +238,4 @@ backend/app/recommendation/model/
 # Temporary files
 *.tmp
 *.temp
+*.tar
