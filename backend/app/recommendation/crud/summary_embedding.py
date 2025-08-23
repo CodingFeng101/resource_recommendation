@@ -5,8 +5,9 @@ from typing import List, Optional
 from uuid import UUID
 import json
 
-from ..model.model import SummaryEmbedding
-from ..schema.summary_embedding import SummaryEmbeddingCreate, SummaryEmbeddingResponse
+from backend.app.recommendation.model import SummaryEmbedding
+from ..schema.summary_embedding import SummaryEmbeddingCreate
+
 
 class CRUDSummaryEmbedding:
     def create(self, db: Session, *, obj_in: SummaryEmbeddingCreate) -> SummaryEmbedding:

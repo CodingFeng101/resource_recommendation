@@ -5,8 +5,9 @@ from typing import List, Optional
 from uuid import UUID
 import json
 
-from ..model.model import ReportEmbedding
-from ..schema.report_embedding import ReportEmbeddingCreate, ReportEmbeddingResponse
+from backend.app.recommendation.model import ReportEmbedding
+from ..schema.report_embedding import ReportEmbeddingCreate
+
 
 class CRUDReportEmbedding:
     def create(self, db: Session, *, obj_in: ReportEmbeddingCreate) -> ReportEmbedding:
