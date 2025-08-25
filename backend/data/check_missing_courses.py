@@ -91,7 +91,7 @@ def find_missing_courses(all_courses: List[Dict[str, Any]], existing_ids: Set[st
     
     for course in all_courses:
         course_id = course.get('course_id')
-        if course_id and course_id not in existing_ids:
+        if course_id == "1837024298040266754":
             missing_courses.append(course)
 
     
@@ -158,28 +158,31 @@ def main():
     if not all_courses:
         print("没有加载到课程数据，程序退出")
         return
+    missing_courses = []
+    for course in all_courses[:30]:
+        missing_courses.append(course)
     
-    # 2. 获取数据库中已存在的 course_id
-    existing_ids = get_existing_course_ids()
-    
-    # 3. 找出缺失的课程
-    missing_courses = find_missing_courses(all_courses, existing_ids)
-    
-    # 4. 打印统计信息
-    print_statistics(all_courses, existing_ids, missing_courses)
-    
-    # 5. 保存缺失的课程数据
-    if missing_courses:
-        success = save_missing_courses(missing_courses, output_file)
-        if success:
-            print(f"\n缺失的课程数据已保存到: {output_file}")
-            print("你可以使用这个文件重新导入缺失的课程数据")
-        else:
-            print("\n保存文件失败")
-    else:
-        print("\n没有发现缺失的课程数据，所有课程都已存在于数据库中")
-    
-    print("\n检查完成！")
+    # # 2. 获取数据库中已存在的 course_id
+    # existing_ids = get_existing_course_ids()
+    #
+    # # 3. 找出缺失的课程
+    # missing_courses = find_missing_courses(all_courses, existing_ids)
+    #
+    # # 4. 打印统计信息
+    # print_statistics(all_courses, existing_ids, missing_courses)
+    #
+    # # 5. 保存缺失的课程数据
+    # if missing_courses:
+    success = save_missing_courses(missing_courses, output_file)
+    #     if success:
+    #         print(f"\n缺失的课程数据已保存到: {output_file}")
+    #         print("你可以使用这个文件重新导入缺失的课程数据")
+    #     else:
+    #         print("\n保存文件失败")
+    # else:
+    #     print("\n没有发现缺失的课程数据，所有课程都已存在于数据库中")
+    #
+    # print("\n检查完成！")
 
 if __name__ == "__main__":
     main()
