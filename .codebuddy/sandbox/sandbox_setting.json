@@ -1,0 +1,20 @@
+{
+  "path": "d:\\PycharmProjects\\resource_recommendation",
+  "desc": "这是一个基于FastAPI的智能资源推荐系统后端项目，提供资源推荐、数据分析、用户管理等功能，支持MySQL数据库和OpenAI API集成。",
+  "id": "85299901207a40cc907234b959089bfd",
+  "data": {
+    "spaceKey": "85299901207a40cc907234b959089bfd",
+    "connections": {
+      "webIDE": "https://85299901207a40cc907234b959089bfd.ap-singapore.cloudstudio.club",
+      "preview": "https://85299901207a40cc907234b959089bfd--{port}.ap-singapore.cloudstudio.club",
+      "api": "https://85299901207a40cc907234b959089bfd--api.ap-singapore.cloudstudio.club",
+      "pty": "https://85299901207a40cc907234b959089bfd--pty.ap-singapore.cloudstudio.club"
+    }
+  },
+  "config": {
+    "api": "https://85299901207a40cc907234b959089bfd--api.ap-singapore.cloudstudio.club",
+    "pty": "https://85299901207a40cc907234b959089bfd--pty.ap-singapore.cloudstudio.club",
+    "region": "ap-shanghai",
+    "spaceKey": "85299901207a40cc907234b959089bfd"
+  }
+}
