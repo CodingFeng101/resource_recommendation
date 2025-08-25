@@ -99,9 +99,9 @@ class GenericResponseGetter(ResponseGetter):
     @staticmethod
     async def get_vector(
             query: str,
-            base_url: str = "http://106.227.68.83:9997",
+            base_url: str = "http://106.227.68.33:11434",
             # base_url: str = "http://localhost:11434",
-            model: str = "bge-large-zh-v1.5"
+            model: str = "dztech/bge-large-zh:v1.5"
     ) -> List[float]:
         """
         通过 Ollama 获取句向量
@@ -110,8 +110,8 @@ class GenericResponseGetter(ResponseGetter):
         :param model: 模型名称（已在 Ollama 中 pull 过）
         :return: 向量 List[float]
         """
-        url = f"{base_url.rstrip('/')}/v1/embeddings"
-        # url = f"{base_url.rstrip('/')}/api/embeddings"         # 本地测试
+        # url = f"{base_url.rstrip('/')}/v1/embeddings"
+        url = f"{base_url.rstrip('/')}/api/embeddings"         # 本地测试
         payload = {"model": model, "prompt": query}
 
         async with aiohttp.ClientSession() as session:
@@ -125,8 +125,7 @@ class GenericResponseGetter(ResponseGetter):
                         f"Ollama 请求失败，状态码：{resp.status}，内容：{await resp.text()}"
                     )
                 data = await resp.json()
-                print(data)
-                return data["data"][0]["embedding"]
+                return data["embedding"]
 
 
 async def main():

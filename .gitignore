@@ -239,4 +239,3 @@ config/local.py
 *.tmp
 *.temp
 *.tar
-*.sql

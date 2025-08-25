@@ -66,18 +66,11 @@ def create_app() -> FastAPI:
     # 添加CORS中间件
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000", "http://localhost:8080"],
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
-
-    # 添加可信主机中间件
-    if not settings.debug:
-        app.add_middleware(
-            TrustedHostMiddleware,
-            allowed_hosts=["localhost", "127.0.0.1", settings.host]
-        )
 
     # 注册异常处理器
     app.add_exception_handler(HTTPException, custom_http_exception_handler)

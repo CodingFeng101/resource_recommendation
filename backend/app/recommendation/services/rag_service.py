@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import logging
 from typing import List, Dict, Any
 
 from sklearn.metrics.pairwise import cosine_similarity
@@ -175,7 +176,7 @@ class RagService:
                 return []
             
             similarities = []
-            similarity_threshold = 0.7
+            similarity_threshold = 0.1
             # 3. 计算每个summary与查询的相似度
             for embedding in all_embeddings:
                 try:
