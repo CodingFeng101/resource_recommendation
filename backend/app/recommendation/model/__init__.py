@@ -4,6 +4,14 @@ from .video_summary import VideoSummary
 from .summary_embedding import SummaryEmbedding
 from .report import Report
 from .report_embedding import ReportEmbedding
+from .knowledge_graph import KnowledgeGraph
+from .knowledge_entity import KnowledgeEntity
+from .knowledge_relationship import KnowledgeRelationship
+from .schema_graph import SchemaGraph
+from .schema_entity import SchemaEntity
+from .schema_relationship import SchemaRelationship
+from .community import Community
+from .embedding import Embedding
 
 __all__ = [
     "Base",
@@ -11,5 +19,13 @@ __all__ = [
     "VideoSummary",
     "SummaryEmbedding",
     "Report",
-    "ReportEmbedding"
+    "ReportEmbedding",
+    "KnowledgeGraph",
+    "KnowledgeEntity",
+    "KnowledgeRelationship",
+    "SchemaGraph",
+    "SchemaEntity",
+    "SchemaRelationship",
+    "Community",
+    "Embedding"
 ]

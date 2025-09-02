@@ -1,8 +1,13 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import asyncio
+from fastapi import Request
 
-from database.db_mysql import async_db_session
-from sapperrag.crud.crud_community import community_dao
-from sapperrag.schema.community import CommunityBase
+from backend.app.recommendation.crud.crud_community import community_dao
+from backend.app.recommendation.model import Community
+from backend.app.recommendation.schema.community import CommunityBase, UpdateCommunityParam
+from backend.common.exception.exception import errors
+from backend.database.db_mysql import async_db_session
 
 
 class CommunityService:
@@ -14,6 +19,47 @@ class CommunityService:
             # 创建图谱库
             return await community_dao.create(db, obj)
 
+
+    @staticmethod
+    async def update(*, uuid: str, obj: UpdateCommunityParam) -> int:
+        async with async_db_session.begin() as db:
+            community = await community_dao.get_by_uuid(db, uuid)
+            if not community:
+                return 0
+
+            # 检查更新的名称是否已存在
+            if obj.title == community.title and obj.content == community.content and obj.rating == community.rating:
+                return 0
+
+            count = await community_dao.update_community(db, community.id, obj)
+            return count
+
+    @staticmethod
+    async def get_community(*, uuid: str = None, name: str = None) -> Community:
+        async with async_db_session() as db:
+            community = await community_dao.get_with_relation(db, uuid=uuid, name=name)
+            if not community:
+                raise errors.NotFoundError(msg='图谱库不存在')
+            return community
+
+    @staticmethod
+    async def delete(*, uuid: str) -> int:
+        async with async_db_session.begin() as db:
+            community = await community_dao.get_by_uuid(db, uuid)
+            if not community:
+                raise errors.NotFoundError(msg='图谱库不存在')
+            count = await community_dao.delete(db, community.id)
+
+            # # 删除缓存
+            # key_prefix = [
+            #     f'{settings.KG_BASE_REDIS_PREFIX}:{community.id}',
+            #     f'{settings.TOKEN_REDIS_PREFIX}:{community.id}',
+            #     f'{settings.TOKEN_REFRESH_REDIS_PREFIX}:{community.id}'
+            # ]
+            # for key in key_prefix:
+            #     await redis_client.delete_prefix(key)
+            return count
+
     @staticmethod
     async def delete_all(*, knowledge_graph_uuid: str) -> int:
         async with async_db_session.begin() as db:
@@ -22,8 +68,24 @@ class CommunityService:
                 return 0
             for community in communities:
                 count = await community_dao.delete(db, community.id)
+
+            # # 删除缓存
+            # key_prefix = [
+            #     f'{settings.KG_BASE_REDIS_PREFIX}:{community.id}',
+            #     f'{settings.TOKEN_REDIS_PREFIX}:{community.id}',
+            #     f'{settings.TOKEN_REFRESH_REDIS_PREFIX}:{community.id}'
+            # ]
+            # for key in key_prefix:
+            #     await redis_client.delete_prefix(key)
             return count
 
+    @staticmethod
+    async def get_all(*,kg_base_uuid: str, name: str = None) -> list[Community]:
+        async with async_db_session() as db:
+            communities = await community_dao.get_list(db, kg_base_uuid=kg_base_uuid, name=name)
+            if not communities:
+                raise errors.NotFoundError(msg='架构图谱不存在')
+            return communities
 
 
 community_service = CommunityService()

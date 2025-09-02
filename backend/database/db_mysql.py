@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from uuid import uuid4
+
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
-from backend.app.recommendation.model import Base
+from backend.app.recommendation.model.base import Base
 from backend.core.config import settings
 
 # 异步数据库引擎（MySQL）

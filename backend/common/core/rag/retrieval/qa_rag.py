@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from backend.common.llm.response_getter import GenericResponseGetter
+from backend.common.core.llm import GenericResponseGetter
 from backend.common.core.rag.retrieval.base import RAG
 
 

@@ -1,0 +1,5 @@
+pdf_converter_config:
+  extracted_image_scale: 2.0
+  if_generate_page_image: Ture
+  if_generate_picture_images: Ture
+
