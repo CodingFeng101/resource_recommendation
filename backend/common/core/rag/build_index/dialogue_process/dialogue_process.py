@@ -4,8 +4,8 @@ from jinja2 import Template
 
 from tqdm import tqdm
 
-from backend.common.llm.response_getter import GenericResponseGetter
-from backend.common.utils import clean_json_output
+from backend.common.clean import clean_json_output
+from backend.common.core.llm.response_getter import GenericResponseGetter
 from .prompt import REPORT_GENERATION, LABEL_GENERATION
 
 

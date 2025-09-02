@@ -11,10 +11,9 @@ from backend.app.recommendation.crud.summary_embedding import summary_embedding_
 from backend.app.recommendation.crud.video_summary import video_summary_dao
 from backend.app.recommendation.schema import CourseCreate, CourseUpdate, VideoSummaryCreate, SummaryEmbeddingCreate, \
     ReportCreate, ReportEmbeddingCreate
+from backend.common.core.llm.response_getter import GenericResponseGetter
 from backend.common.core.rag.build_index.dialogue_process.dialogue_process import DialogueProcessor
-from backend.common.exception.exception import errors
 from backend.database.db_mysql import async_db_session
-from backend.common.llm.response_getter import GenericResponseGetter
 import json
 import numpy as np
 
