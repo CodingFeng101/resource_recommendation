@@ -174,7 +174,7 @@ class RagService:
                 return []
             
             similarities = []
-            similarity_threshold = 0.7
+            similarity_threshold = 0
             # 3. 计算每个summary与查询的相似度
             for embedding in all_embeddings:
                 try:
@@ -318,7 +318,7 @@ class RagService:
                 return []
             
             similarities = []
-            similarity_threshold = 0.7
+            similarity_threshold = 0
             # 4. 计算每个报告的embedding与查询的相似度
             for report in reports:
                 # 获取对应的report_embedding

@@ -319,11 +319,11 @@ async def build_index():
         return response_base.fail(message=f"任务失败, 请检查API账户并稍后重试: {str(e)}")
 
 
-@router.post('/ask/{uuid}', summary='基于索引进行问答')
-async def ask_knowledge_graph(uuid: Annotated[str, Path(...)],
+@router.post('/ask/{course_id}', summary='基于索引进行问答')
+async def ask_knowledge_graph(course_id: Annotated[str, Path(...)],
                               message: str = Query(..., description="查询内容")):
      try:
-        knowledge_graph = await knowledge_graph_service.get_knowledge_graph(uuid=uuid)
+        knowledge_graph = await knowledge_graph_service.get_knowledge_graph(uuid=course_id)
         data = GetIndexDetail(**select_as_dict(knowledge_graph))
         # 执行查询
         response = await knowledge_graph_service.query(
