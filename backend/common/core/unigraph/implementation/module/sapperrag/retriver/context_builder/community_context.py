@@ -20,7 +20,7 @@ def build_community_context(
         selected_entities: List[Entity],
         token_encoder,
         column_delimiter: str = "|",
-        max_tokens: int = 6000,
+        max_tokens: int = 8000,
         user_level: int = 0,
         infer: bool = False,
         min_community_rank: int = 1,
@@ -42,7 +42,7 @@ def build_community_context(
     :return: 上下文文本, 上下文数据, human_read_id
     """
     sorted_community_reports = sort_community(community_reports, selected_entities, user_level, infer)
-    logger.info(f"已排序社区报告😊")
+    logger.info(f"已排序社区报告{sorted_community_reports}😊")
     def _is_included(report: community_reports) -> bool:
         return report.rating is not None and float(report.rating) >= min_community_rank
 

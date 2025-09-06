@@ -12,7 +12,7 @@ from ..structured_search.local_search.system_prompt import EXTRACT_ENTITIES_FROM
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-async def extract_entities_from_query(query, llm, api_key, base_url, model, max_retries=3) -> Any:
+async def extract_entities_from_query(query, llm, max_retries=3) -> Any:
     """
     从查询中抽取实体
 
@@ -25,7 +25,7 @@ async def extract_entities_from_query(query, llm, api_key, base_url, model, max_
 
     for attempt in range(max_retries):
         try:
-            extract_entities = await llm.get_response(query=extract_prompt, api_key=api_key, base_url=base_url, model=model)
+            extract_entities = await llm.get_response(query=extract_prompt)
             logger.debug(f"尝试 {attempt}: LLM 返回的响应 - {extract_entities}")
             extract_entities_list = json.loads(extract_entities)
             return extract_entities_list
@@ -36,7 +36,7 @@ async def extract_entities_from_query(query, llm, api_key, base_url, model, max_
     return [f"{query}"]
 
 
-async def map_query_to_entities(extracted_entities, all_entities, api_key, base_url, k=10):
+async def map_query_to_entities(extracted_entities, all_entities, k=10):
     embeder = GenericResponseGetter()
     if extracted_entities:
         entities_list = []
@@ -50,7 +50,7 @@ async def map_query_to_entities(extracted_entities, all_entities, api_key, base_
             # 计算查询与所有实体之间的相似度
             for entity in all_entities:
                 entity_embed = np.array(entity.attributes_embedding)
-
+                # if entity_embed.size > 0:
                 # 确保entity_embed是二维数组
                 if entity_embed.ndim == 1:
                     entity_embed = entity_embed.reshape(1, -1)

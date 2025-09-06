@@ -24,18 +24,18 @@ class BaseSearch(ABC):
             List[Any]: The search results.
         """
 
-    @abstractmethod
-    async def asearch(self, query: str, level: int, infer: bool, api_key:str, base_url:str, model: str, **kwargs: Any) -> List[Any]:
-        """Asynchronously search for the given query.
-
-        Args:
-            api_key (str): api_key of User.
-            base_url (str): base_url of User.
-            query (str): The search query.
-            level (int): The search level.
-            infer (bool): Whether to infer the query.
-            **kwargs (Any): Additional keyword arguments for the search.
-
-        Returns:
-            List[Any]: The search results.
-        """
+    # @abstractmethod
+    # async def asearch(self, query: str, level: int, infer: bool, api_key:str, base_url:str, model: str, **kwargs: Any) -> List[Any]:
+    #     """Asynchronously search for the given query.
+    #
+    #     Args:
+    #         api_key (str): api_key of User.
+    #         base_url (str): base_url of User.
+    #         query (str): The search query.
+    #         level (int): The search level.
+    #         infer (bool): Whether to infer the query.
+    #         **kwargs (Any): Additional keyword arguments for the search.
+    #
+    #     Returns:
+    #         List[Any]: The search results.
+    #     """

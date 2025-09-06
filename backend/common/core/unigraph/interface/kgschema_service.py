@@ -2,26 +2,16 @@ from backend.common.core.unigraph.implementation.module.schema_construction.sche
     SchemaConstruction
 
 
-async def create_schema(
-        file_path_list,
-        aim,
-        api_key,
-        base_url,
-        model: str,
-):
+async def create_schema(aim, text_data):
     construction = SchemaConstruction(
         kg_schema=[],
         definition={}
     )
     modify_info = {"add_entity": [], "add_relationship": [], "del_entity": [], "del_relationship": []}
     schema, definition = await construction.extract_from_path(
-        file_path_list=file_path_list,
         aim=aim,
-        info=modify_info,
+        text_data=text_data,
         directional_suggestion="",
-        api_key=api_key,
-        base_url=base_url,
-        model=model
     )
     return schema, definition
 

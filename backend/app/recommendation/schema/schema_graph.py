@@ -1,4 +1,8 @@
 from __future__ import annotations
+
+import uuid
+from typing import Dict
+
 from pydantic import model_validator, Field
 from backend.common.schema import SchemaBase
 from datetime import datetime
@@ -8,9 +12,10 @@ class SchemaGraphBase(SchemaBase):
     """获取图谱详情"""
     name: str | None = Field("")
     aim: str | None = Field("")
-    kg_base_uuid: str | None = Field("")
+    kg_base_uuid: str | None = Field(default_factory=lambda: str(uuid.uuid4()))
     modify_info: str | None = Field("")
     modify_suggestion: str | None = Field("")
+    text_data: str | None = Field("")
 
 
 class SchemaGraphResponse(SchemaGraphBase):

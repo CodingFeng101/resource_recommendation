@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-import shutil
-from uuid import uuid4
 
 import asyncio
-from fastapi import Request
 
 from backend.app.recommendation.crud.crud_schema_graph import schema_graph_dao
 from backend.app.recommendation.model import SchemaGraph
@@ -83,41 +80,14 @@ class SchemaGraphService:
     @staticmethod
     async def create_schema(
             *,
-            file_paths: list[str],
             aim: str = None,
-            api_key:str,
-            base_url:str,
-            model: str,
+            text_data: str = None,
     ):
-        async with SchemaGraphService._lock:  # 使用异步锁确保同一时间只有一个请求被发送
-            file_locations = []
-
-            # 为每个请求生成一个唯一的UUID并创建子目录
-            request_temp_dir = os.path.join(PERMANENT_TEMP_DIR, str(uuid4()))
-            os.makedirs(request_temp_dir, exist_ok=True)
-
-            try:
-                # 模拟上传文件，复制一份到临时目录
-                for file_path in file_paths:
-                    filename = os.path.basename(file_path)
-                    temp_path = os.path.join(request_temp_dir, filename)
-                    # 确保路径格式正确，处理相对路径
-                    if file_path.startswith('./'):
-                        relative_file_path = os.path.normpath(file_path[2:])  # 移除 './' 前缀
-                    else:
-                        relative_file_path = os.path.normpath(file_path)
-                    shutil.copy(relative_file_path, temp_path)
-                    # 调用之前定义的上传函数，假设它返回一个SchemaResponse对象
-                schema, definition = await create_schema(
-                    file_path_list=file_locations,
-                    aim=aim,
-                    api_key=api_key,
-                    base_url=base_url,
-                    model=model,
-                )
-            finally:
-                # 删除临时文件
-                shutil.rmtree(request_temp_dir)
+        async with SchemaGraphService._lock:
+            schema, definition = await create_schema(
+                aim=aim,
+                text_data=text_data
+            )
             return schema, definition
 
 

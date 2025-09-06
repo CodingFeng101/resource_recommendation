@@ -9,8 +9,7 @@ from sys import stderr, stdout
 from asgi_correlation_id import correlation_id
 from loguru import logger
 
-from backend.core import path_conf
-from backend.core.conf import settings
+from backend.core.config import settings
 
 
 class InterceptHandler(logging.Handler):
@@ -83,43 +82,5 @@ def setup_logging():
             },
         ]
     )
-
-
-def set_customize_logfile():
-    log_path = path_conf.LOG_DIR
-    if not os.path.exists(log_path):
-        os.mkdir(log_path)
-
-    # log files
-    log_stdout_file = os.path.join(log_path, settings.LOG_STDOUT_FILENAME)
-    log_stderr_file = os.path.join(log_path, settings.LOG_STDERR_FILENAME)
-
-    # loguru logger: https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.add
-    log_config = {
-        'rotation': '10 MB',
-        'retention': '15 days',
-        'compression': 'tar.gz',
-        'enqueue': True,
-        'format': settings.LOG_LOGURU_FORMAT,
-    }
-
-    # stdout file
-    logger.add(
-        str(log_stdout_file),
-        level=settings.LOG_STDOUT_LEVEL,
-        **log_config,
-        backtrace=False,
-        diagnose=False,
-    )
-
-    # stderr file
-    logger.add(
-        str(log_stderr_file),
-        level=settings.LOG_STDERR_LEVEL,
-        **log_config,
-        backtrace=True,
-        diagnose=True,
-    )
-
 
 log = logger

@@ -16,7 +16,7 @@ class CommunityReportGenerator:
         self.input_data = input_data
         self.prompt_template = REPORT_GENERATE
 
-    async def _process_single_community(self, index, community_df, llm, max_retries, api_key, base_url, model):
+    async def _process_single_community(self, index, community_df, llm, max_retries):
         """
         带指数退避的重试机制处理单个社区
 
@@ -33,9 +33,7 @@ class CommunityReportGenerator:
                 # 生成报告内容
                 community = f"{community_df.title} ({community_df.id}): {community_df.full_content}"
                 response = await llm.get_response(
-                    # query=self.prompt_template.render(community=community), api_key=api_key, base_url=base_url, model=model
-
-                    query=self.prompt_template.format(input_text=community), api_key=api_key, base_url=base_url, model=model
+                    query=self.prompt_template.format(input_text=community)
                 )
 
                 # 处理响应结果
@@ -57,7 +55,7 @@ class CommunityReportGenerator:
                 await asyncio.sleep(backoff_factor * (2 ** attempt))
         return index, None
 
-    async def generate_reports(self, max_retries=6, concurrent_tasks=50, api_key="", base_url="", model=""):
+    async def generate_reports(self, max_retries=6, concurrent_tasks=50):
         """
         并发处理社区报告生成
 
@@ -67,13 +65,13 @@ class CommunityReportGenerator:
         llm = GenericResponseGetter()
         semaphore = asyncio.Semaphore(concurrent_tasks)  # 控制并发量
 
-        async def bounded_task(index, community, api_key, base_url, model):
+        async def bounded_task(index, community):
             async with semaphore:
-                return await self._process_single_community(index, community, llm, max_retries, api_key, base_url, model)
+                return await self._process_single_community(index, community, llm, max_retries)
 
         # 创建任务列表
         tasks = [
-            bounded_task(index, community, api_key, base_url, model)
+            bounded_task(index, community)
             for index, community in enumerate(self.input_data)
         ]
 
