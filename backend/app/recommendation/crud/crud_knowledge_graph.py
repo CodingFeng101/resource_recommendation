@@ -131,7 +131,7 @@ class CRUDKnowledgeGraph(CRUDPlus[KnowledgeGraph]):
             .options(selectinload(self.model.communities))  # 使用 selectinload 加载 communities
         )
 
-        where_list = [self.model.uuid == uuid]
+        where_list = [self.model.course_id == uuid]
         if name:
             where_list.append(self.model.name.like(f'%{name}%'))
         if where_list:
