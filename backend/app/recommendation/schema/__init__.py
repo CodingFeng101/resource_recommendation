@@ -59,6 +59,3 @@ class GetIndexDetail(KnowledgeGraphResponse):
 class GetKnowledgeGraphDetail(GetIndexDetail):
     schema_graph: SchemaGraphResponse
 
-
-
-

@@ -5,6 +5,6 @@ from backend.common.model import MappedBase
 community_entity_map = Table(
     'community_entity_map',
     MappedBase.metadata,
-    Column('community_id', ForeignKey('community.uuid', ondelete='CASCADE'), primary_key=True),
-    Column('knowledge_entity_id', ForeignKey('knowledge_entity.uuid', ondelete='CASCADE'), primary_key=True)
+    Column('community_id', ForeignKey('community.id', ondelete='CASCADE'), primary_key=True),
+    Column('knowledge_entity_id', ForeignKey('knowledge_entity.id', ondelete='CASCADE'), primary_key=True)
 )

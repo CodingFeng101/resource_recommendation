@@ -10,31 +10,27 @@ from datetime import datetime
 
 class KnowledgeGraphBase(SchemaBase):
     """获取图谱详情"""
-    name: str
-    video_summary_uuid: str = Field(..., description="关联的视频摘要UUID")
+    name: str | None = Field("")
+    course_id: str | None = Field("")
     schema_graph_uuid: str | None = Field("")
-    kg_base_uuid: str | None = Field("")
 
 
 class KnowledgeGraphResponse(KnowledgeGraphBase):
     id: int
     uuid: str
-    video_summary_uuid: str
+    course_id: str
     index_status: int
     created_time: datetime
     updated_time: datetime | None = None
 
 
 class AddKnowledgeGraphParam(SchemaBase):
-    file_paths: list[str]
+    file_paths: list[str] | None
     data: KnowledgeGraphBase
 
 
 class AskKnowledgeGraphParam(SchemaBase):
     message: str
-    infer: bool = False
-    depth: int = 1
-    user_token: str
 
 
 class BuildKnowledgeGraphIndexParam(SchemaBase):

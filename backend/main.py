@@ -7,7 +7,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.exceptions import RequestValidationError
 from backend.core.config import settings
 from backend.core.logging import logger
-from backend.database.db_mysql import create_tables
+from backend.database.db_mysql import create_table
 from backend.app.recommendation.api.router import api_router
 from backend.common.exception.exception_handlers import (
     custom_http_exception_handler,
@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
 
     # 创建数据库表
     try:
-        await create_tables()
+        await create_table()
         logger.info("数据库表创建成功")
     except Exception as e:
         logger.error(f"数据库表创建失败: {e}")

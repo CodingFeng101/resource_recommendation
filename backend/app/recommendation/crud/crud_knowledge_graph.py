@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy_crud_plus import CRUDPlus
 
-from backend.app.recommendation.model import KnowledgeGraph
-from backend.app.recommendation.schema.knowledge_graph import KnowledgeGraphBase
+from backend.app.recommendation.model import KnowledgeGraph, KnowledgeEntity
+from backend.app.recommendation.schema.knowledge_graph import KnowledgeGraphBase, UpdateKnowledgeGraphParam
 
 
 class CRUDKnowledgeGraph(CRUDPlus[KnowledgeGraph]):
@@ -23,17 +23,17 @@ class CRUDKnowledgeGraph(CRUDPlus[KnowledgeGraph]):
             self,
             db: AsyncSession,
             name: str,
-            kg_base_uuid: str
+            course_id: str
     ) -> KnowledgeGraph | None:
         """
         通过名称获取架构图谱
         :param db: 异步数据库会话
         :param name: 架构图谱名称
-        :param kg_base_uuid: 知识图谱基础 UUID
+        :param course_id: 知识图谱基础 UUID
         :return: 返回架构图谱对象，或者 None
         """
-        # 添加一个筛选条件，即kg_base_uuid
-        return await self.select_model_by_column(db, name=name, kg_base_uuid=kg_base_uuid)
+        # 添加一个筛选条件，即course_id
+        return await self.select_model_by_column(db, name=name, course_id=course_id)
 
     async def get_by_uuid(self, db: AsyncSession, uuid: str) -> KnowledgeGraph | None:
         """
@@ -115,9 +115,7 @@ class CRUDKnowledgeGraph(CRUDPlus[KnowledgeGraph]):
     async def get_with_relation(self, db: AsyncSession, *, uuid: str = None, name: str = None) -> KnowledgeGraph | None:
         """
         :param uuid:
-        :param status:
         :param name:
-        :param kg_base_uuid:
         :param db:
         :return:
         """
@@ -142,8 +140,6 @@ class CRUDKnowledgeGraph(CRUDPlus[KnowledgeGraph]):
         knowledge_graph = await db.execute(stmt)
 
         return knowledge_graph.scalars().first()
-
-
 
     async def get_depth(self, db: AsyncSession, uuid: str) -> int:
         """
@@ -200,7 +196,16 @@ class CRUDKnowledgeGraph(CRUDPlus[KnowledgeGraph]):
         """
         return await self.update_model(db, knowledge_graph_id, {'cover_image': cover_image})
 
+    async def get_all_uuids(self, db: AsyncSession) -> list[str]:
+        """
+        获取 knowledge_graph 表中所有的 uuid
 
+        :param db: 异步数据库会话
+        :return: uuid 列表
+        """
+        stmt = select(self.model.uuid)
+        result = await db.execute(stmt)
+        return [row[0] for row in result.all()]
 
 
 # 实例化 CRUD 对象

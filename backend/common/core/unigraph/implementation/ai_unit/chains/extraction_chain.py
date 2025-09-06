@@ -20,10 +20,7 @@ class ExtractionInstruction1(BaseInstruction):
             ResponseGetter,
             chunk: str,
             kg_schema: List,
-            schema_definition: Dict,
-            api_key: str,
-            base_url: str,
-            model: str,
+            schema_definition: Dict
         ):
         """
         参数三件套，为整条责任链的起始参数
@@ -31,19 +28,13 @@ class ExtractionInstruction1(BaseInstruction):
         :param chunk: 待提取的文本
         :param kg_schema: 知识图谱的schema
         :param schema_definition: 知识图谱的schema定义
-        :param api_key: API密钥
-        :param base_url: API基础URL
-        :param model: 模型名称
         :return: 下一步责任链的执行结果
         """
         # 执行实体提取与结果解析
         query = EntityExtractionTemplate.render_template(
             kg_schema=kg_schema, schema_definition=schema_definition, text_chunk=chunk)  # 生成步骤请求
         response = await ai_response_getter.get_response(
-            query=query,
-            api_key=api_key,
-            base_url=base_url,
-            model=model
+            query=query
         )  # 获取响应
 
         ins1_output = EntityExtractionResponseParser.parse(response)  # 解析响应
@@ -57,10 +48,7 @@ class ExtractionInstruction1(BaseInstruction):
                 ins1_output=ins1_output,
                 chunk=chunk,
                 kg_schema=kg_schema,
-                schema_definition=schema_definition,
-                api_key=api_key,
-                base_url=base_url,
-                model=model,
+                schema_definition=schema_definition
             )
 
 
@@ -72,9 +60,6 @@ class ExtractionInstruction2(BaseInstruction):
             chunk: str,
             kg_schema: List,
             schema_definition: Dict,
-            api_key: str,
-            base_url: str,
-            model: str,
     ):
         query = RelationExtractionTemplate.render_template(
             entity_type_dict=ins1_output[0], kg_schema=kg_schema, schema_definition=schema_definition, text_chunk=chunk)
@@ -82,9 +67,6 @@ class ExtractionInstruction2(BaseInstruction):
         # 所得三元组集合字符串
         response = await ai_response_getter.get_response(
             query=query,
-            api_key=api_key,
-            base_url=base_url,
-            model=model,
         )
 
         # 无需解析直接进行下一步
@@ -101,9 +83,6 @@ class ExtractionInstruction2(BaseInstruction):
                 chunk=chunk,
                 kg_schema=kg_schema,
                 schema_definition=schema_definition,
-                api_key=api_key,
-                base_url=base_url,
-                model=model
             )
 
 
@@ -116,9 +95,6 @@ class ExtractionInstruction3(BaseInstruction):
             chunk: str,
             kg_schema: List,
             schema_definition: Dict,
-            api_key: str,
-            base_url: str,
-            model: str,
     ):
         # 执行三元组溯源与结果解析
         query = TriplesTracingTemplate.render_template(
@@ -135,15 +111,9 @@ class ExtractionInstruction3(BaseInstruction):
         response, response_ = await asyncio.gather(
             ai_response_getter.get_response(
                 query=query,
-                api_key=api_key,
-                base_url=base_url,
-                model=model,
             ),
             ai_response_getter.get_response(
                 query=query_,
-                api_key=api_key,
-                base_url=base_url,
-                model=model,
             )
         )
 
@@ -189,9 +159,6 @@ class ExtractionInstruction3(BaseInstruction):
                 ins2_output=ins3_output,
                 chunk=chunk,
                 kg_schema=kg_schema,
-                api_key=api_key,
-                base_url=base_url,
-                model=model,
             )
         else:
             return ins2_output, ins3_output
@@ -205,18 +172,12 @@ class ExtractionInstruction4(BaseInstruction):
             ins2_output: Tuple,
             chunk: str,
             kg_schema: List,
-            api_key: str,
-            base_url: str,
-            model: str,
     ):
         # 执行属性提取与结果解析
         query = AttributeExtractionTemplate.render_template(
             text_chunk=chunk, kg_schema=kg_schema, extracted_entities_dict=ins1_output[0])
         response = await ai_response_getter.get_response(
             query=query,
-            api_key=api_key,
-            base_url=base_url,
-            model=model,
         )
 
         ins3_output = AttributeExtractionResponseParser.parse(response)  # 实体属性嵌套字典entity_attribute_dict
@@ -242,9 +203,6 @@ async def run_extraction_chain(
         chunk: str = "",
         kg_schema: List = None,
         schema_definition: Dict = None,
-        api_key: str = None,
-        base_url: str = None,
-        model: str = None,
 ):
     """
     参数待定，是为chain的起始参数
@@ -268,10 +226,7 @@ async def run_extraction_chain(
         ai_response_getter=ai_response_getter,
         chunk=chunk,
         kg_schema=kg_schema,
-        schema_definition=schema_definition,
-        api_key=api_key,
-        base_url=base_url,
-        model=model,
+        schema_definition=schema_definition
     )
     if not result:  # 如果无法确定任何关系，直接返回空值
         return [], {}  # 分别是kg_json_format和source_row_list

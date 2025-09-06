@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     MYSQL_USER: str = Field(description="MySQL用户名")
     MYSQL_PASSWORD: str = Field(description="MySQL密码")
     MYSQL_DATABASE: str = Field(description="MySQL数据库名")
+    MYSQL_CHARSET: str = Field(description="")
 
     # 日志配置
     log_level: str = Field(default="INFO", description="日志级别")
@@ -55,10 +56,11 @@ class Settings(BaseSettings):
         return f"mysql+asyncmy://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
 
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False
+    )
 
 
 # 创建全局配置实例

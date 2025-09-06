@@ -1,8 +1,8 @@
+import json
 import os
 from typing import List, Dict, Tuple
 
-
-
+from backend.common.core.rag.build_index.dialogue_process.dialogue_process import DialogueProcessor
 from ..file.file_loader import FileLoader
 from ..ai_unit.executor.ai_executor import AIExecutor
 import asyncio
@@ -35,13 +35,7 @@ class SemanticKGConstructor:
 
         return old_schema_data
 
-    async def _process_chunk(
-            self,
-            chunk,
-            api_key: str,
-            base_url: str,
-            model: str,
-    ):
+    async def _process_chunk(self, chunk):
         """
         处理文本块
         """
@@ -50,56 +44,21 @@ class SemanticKGConstructor:
             chunk=chunk,
             kg_schema=self.kg_schema,
             schema_definition=self.schema_definition,
-            api_key=api_key,
-            base_url=base_url,
-            model=model,
         )
         return result
 
-    async def extract_kg(
-            self,
-            dir_path: str,
-            api_key: str,
-            base_url: str,
-            model: str,
-    ) -> Tuple[List, List, List]:
+    async def extract_kg(self, text_data: str) -> Tuple[List, List]:
         """
         提取指定类型文件的KG
         """
-        # Create index:content dictionary && structure KG
-        all_index_content = dict()
-        structure_kg = list()
-        for file_name in os.listdir(dir_path):
-            file_path = os.path.join(dir_path, file_name)
-            if os.path.isfile(file_path):
-                # 读取文件内容
-                index_content, structure_kg_ = self.file_loader.load(file_path)
-                all_index_content.update(index_content)
-                structure_kg.extend(structure_kg_)
-
         # 将文本字典解包，遍历每个键值对并对值进行类型判断，如果是列表则将其并入当前文本总列表中
-        all_chunks = []
-        for key, value in all_index_content.items():
-            if isinstance(value, list):
-                all_chunks.extend(value)
-            else:
-                all_chunks.append(value)
+        all_chunks = DialogueProcessor.chunk_with_overlap(dialogue=text_data)
 
-        logger.info(f"Extracting KG with {len(all_chunks)} chunks")  # debug提取所得
-
-        if not structure_kg:
-            structure_kg.append({"message": "No structure KG extracted"})  # No structure KG extracted=
         kg = list()
         triple_sources = list()
 
         # 创建任务列表
-        tasks = [self._process_chunk(
-            chunk,
-            api_key,
-            base_url,
-            model
-        ) for chunk in all_chunks
-        ]
+        tasks = [self._process_chunk(chunk) for chunk in all_chunks]
 
         # 使用tqdm创建进度条
         with tqdm(total=len(tasks), desc=f"Processing text chunks count {len(all_chunks)}") as pbar:
@@ -112,4 +71,4 @@ class SemanticKGConstructor:
                     triple_sources.extend(triple_source)
 
 
-        return kg, structure_kg, triple_sources
+        return kg, triple_sources

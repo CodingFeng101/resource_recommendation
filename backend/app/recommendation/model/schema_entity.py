@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from backend.app.recommendation.model import SchemaGraph
 from backend.app.recommendation.model.base import uuid4_str
 from backend.common.model import Base, id_key
 

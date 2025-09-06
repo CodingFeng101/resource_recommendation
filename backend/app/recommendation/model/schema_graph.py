@@ -14,11 +14,12 @@ class SchemaGraph(Base):
 
     id: Mapped[id_key] = mapped_column(init=False)
     uuid: Mapped[str] = mapped_column(String(50), init=False, default_factory=uuid4_str, unique=True)
-
+    kg_base_uuid: Mapped[str] = mapped_column(String(50), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False, comment='Schema Graph Name')
     aim: Mapped[str | None] = mapped_column(Text, default=None, comment='目标描述')
     modify_info: Mapped[str | None] = mapped_column(Text, default=None, comment='修改信息')
     modify_suggestion: Mapped[str | None] = mapped_column(Text, default=None, comment='修改建议')
+    text_data: Mapped[str | None] = mapped_column(Text, default=None, comment='种子文本')
 
     entities: Mapped[list['SchemaEntity']] = relationship(
         'SchemaEntity',

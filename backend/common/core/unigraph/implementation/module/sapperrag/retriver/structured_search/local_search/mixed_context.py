@@ -21,7 +21,7 @@ class LocalSearchMixedContext(LocalContextBuilder):
         self.relationships = relationships
         self.community_reports = community_reports
 
-    async def build_context(self, extracted_entities: list, level:int, infer: bool, api_key: str, base_url:str, **kwargs: Any) -> Any:
+    async def build_context(self, extracted_entities: list, level:int, infer: bool, **kwargs: Any) -> Any:
         """
         构建查询上下文
 
@@ -31,8 +31,9 @@ class LocalSearchMixedContext(LocalContextBuilder):
         :param kwargs: 其他参数
         """
         token_encoder = tiktoken.get_encoding("cl100k_base")
-        selected_entities = await map_query_to_entities(extracted_entities, self.entities, api_key, base_url, k=10)
-        logger.info(f"已匹配到实体😊")
+        selected_entities = await map_query_to_entities(extracted_entities, self.entities, k=10)
+        selected_entities_d = [entity.name for entity in selected_entities]
+        logger.info(f"已匹配到实体{selected_entities_d}😊")
 
         human_read_id = 0 # 用于替换复杂的ID,方便模型溯源
         final_context = list[str]()
@@ -48,14 +49,14 @@ class LocalSearchMixedContext(LocalContextBuilder):
         if community_context.strip() != "":
             final_context.append(str(community_context))
             final_context_data["Reports"] = community_context_data
-        logger.info(f"社区文本已检索完成😊")
+        logger.info(f"社区文本已检索完成{community_context}😊")
 
         entity_context, entity_context_data, human_read_id = build_entity_context(selected_entities, token_encoder=token_encoder, human_read_id=human_read_id)
 
         if entity_context.strip() != "":
             final_context.append(str(entity_context))
             final_context_data["Entities"] = entity_context_data
-        logger.info(f"实体文本已检索完成😊")
+        logger.info(f"实体文本已检索完成{entity_context}😊")
 
         selected_relationships, relationship_context, relationship_context_data, human_read_id = build_relationship_context(
             selected_entities=selected_entities,
@@ -67,7 +68,7 @@ class LocalSearchMixedContext(LocalContextBuilder):
         if relationship_context.strip() != "":
             final_context.append(str(relationship_context))
             final_context_data["Relationships"] = relationship_context_data
-        logger.info(f"关系文本已检索完成😊")
+        logger.info(f"关系文本已检索完成{relationship_context}😊")
 
         source_context, source_context_data, human_read_id = build_source_context(selected_relationships=selected_relationships,
                                                                                   token_encoder=token_encoder,
@@ -76,6 +77,6 @@ class LocalSearchMixedContext(LocalContextBuilder):
         if source_context.strip() != "":
             final_context.append(str(source_context))
             final_context_data["Sources"] = source_context_data
-        logger.info(f"来源文本已检索完成😊")
+        logger.info(f"来源文本已检索完成{source_context}😊")
 
         return "\n\n".join(final_context), final_context_data

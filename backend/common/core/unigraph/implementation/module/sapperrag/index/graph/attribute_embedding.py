@@ -14,7 +14,7 @@ class AttributeEmbedder:
         self.semaphore = asyncio.Semaphore(max_concurrent)  # 控制并发量
 
     @staticmethod
-    async def embed_attributes(text_embeder, attributes, api_key, base_url):
+    async def embed_attributes(text_embeder, attributes):
         """
         带指数退避重试的嵌入方法
 
@@ -28,9 +28,7 @@ class AttributeEmbedder:
         for attempt in range(max_retries):
             try:
                 attributes_text = " ".join(f"{k}: {v}" for k, v in attributes.items())
-                response = await text_embeder.get_vector(query=attributes_text,
-                                                         api_key="sk-CRj8WW9b6iNIsqqcB5F7Ce9d7e1c431b8e29Ea634aAa4e87",
-                                                         base_url="https://api.rcouyi.com/v1")
+                response = await text_embeder.get_vector(query=attributes_text)
                 logger.info(f"嵌入成功: {attributes_text}")
                 return np.array(response)
             except Exception as e:
@@ -40,7 +38,7 @@ class AttributeEmbedder:
                 await asyncio.sleep(backoff_factor * (2 ** attempt))
         return np.array([])
 
-    async def _process_single_entity(self, index, entity, embeder, api_key, base_url):
+    async def _process_single_entity(self, index, entity, embeder):
         """
         处理单个实体的异步任务
 
@@ -55,7 +53,7 @@ class AttributeEmbedder:
                 attributes["name"] = entity.name
 
                 # 获取嵌入向量
-                vector = await AttributeEmbedder.embed_attributes(embeder, attributes, api_key, base_url)
+                vector = await AttributeEmbedder.embed_attributes(embeder, attributes)
 
                 # 更新实体数据
                 entity.attributes_embedding = vector.tolist()
@@ -65,7 +63,7 @@ class AttributeEmbedder:
             finally:
                 del attributes["name"]
 
-    async def add_attribute_vectors(self, entities, api_key, base_url):
+    async def add_attribute_vectors(self, entities):
         """
         并发处理所有实体
 
@@ -75,7 +73,7 @@ class AttributeEmbedder:
         # 创建任务列表
         embeder = GenericResponseGetter()
         tasks = [
-            self._process_single_entity(idx, entity, embeder, api_key, base_url)
+            self._process_single_entity(idx, entity, embeder)
             for idx, entity in enumerate(entities)
         ]
 

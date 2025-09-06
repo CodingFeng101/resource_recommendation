@@ -17,7 +17,7 @@ class Community(Base):
     level: Mapped[str] = mapped_column(Text, comment='等级')
     content: Mapped[str] = mapped_column(Text, comment='内容')
     rating: Mapped[str] = mapped_column(Text, comment='评分')
-    attributes: Mapped[str] = mapped_column(Text, comment='属性')
+    attributes: Mapped[str] = mapped_column(Text, comment='属性', default='')
 
     knowledge_graph: Mapped['KnowledgeGraph'] = relationship('KnowledgeGraph', back_populates='communities', init=False)
 

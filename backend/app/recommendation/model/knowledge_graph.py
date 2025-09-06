@@ -8,7 +8,7 @@ from backend.app.recommendation.model.schema_graph import SchemaGraph
 from backend.app.recommendation.model.knowledge_entity import KnowledgeEntity
 from backend.app.recommendation.model.knowledge_relationship import KnowledgeRelationship
 from backend.app.recommendation.model.community import Community
-from backend.app.recommendation.model.video_summary import VideoSummary
+from backend.app.recommendation.model.course import Course
 from backend.common.model import Base, id_key
 
 
@@ -20,7 +20,7 @@ class KnowledgeGraph(Base):
     id: Mapped[id_key] = mapped_column(init=False)
     uuid: Mapped[str] = mapped_column(String(50), init=False, default_factory=uuid4_str, unique=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, comment='Knowledge Graph Name')
-    video_summary_uuid: Mapped[str] = mapped_column(ForeignKey('video_summaries.uuid'), nullable=False)
+    course_id: Mapped[str] = mapped_column(ForeignKey('courses.course_id'), nullable=False)
     schema_graph_uuid: Mapped[str] = mapped_column(ForeignKey('schema_graph.uuid'), nullable=False)
     index_status: Mapped[str] = mapped_column(String(50), nullable=False, default='0', comment='Index Status')
     depth: Mapped[int] = mapped_column(Integer, nullable=False, default=0, comment='Depth')
@@ -30,8 +30,8 @@ class KnowledgeGraph(Base):
         init=False
     )
     
-    video_summary: Mapped['VideoSummary'] = relationship(
-        'VideoSummary',
+    courses: Mapped['Course'] = relationship(
+        'Course',
         back_populates='knowledge_graphs',
         init=False
     )

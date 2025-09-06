@@ -1,6 +1,5 @@
 from sqlalchemy import String, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from backend.app.recommendation.model import KnowledgeEntity
 from backend.app.recommendation.model.base import uuid4_str
 
 from backend.common.model import Base, id_key

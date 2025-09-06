@@ -2,14 +2,11 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-import shutil
 from typing import List
-from uuid import uuid4
-
 import asyncio
 import pandas as pd
 
-from fastapi import Request, HTTPException
+from fastapi import HTTPException
 
 from backend.app.recommendation.crud.crud_knowledge_graph import knowledge_graph_dao
 from backend.app.recommendation.model import KnowledgeGraph
@@ -35,7 +32,7 @@ class KnowledgeGraphService:
     async def add(*, obj: KnowledgeGraphBase) -> str:
         async with async_db_session.begin() as db:
             # 检查图谱库名称是否已存在
-            knowledge_graph = await knowledge_graph_dao.get_by_name(db, name=obj.name, kg_base_uuid=obj.kg_base_uuid)
+            knowledge_graph = await knowledge_graph_dao.get_by_name(db, name=obj.name, course_id=obj.course_id)
             if knowledge_graph:
                 raise errors.ForbiddenError(msg='图谱库名称已存在')
             # 创建图谱库
@@ -66,18 +63,7 @@ class KnowledgeGraphService:
             if not knowledge_graph:
                 raise errors.NotFoundError(msg='图谱库不存在')
             return knowledge_graph
-    
-    @staticmethod
-    async def get_by_video_summary_uuid(*, video_summary_uuid: str) -> list[KnowledgeGraph]:
-        """
-        根据视频摘要UUID获取知识图谱列表
-        
-        :param video_summary_uuid: 视频摘要UUID
-        :return: 知识图谱列表
-        """
-        async with async_db_session() as db:
-            knowledge_graphs = await knowledge_graph_dao.get_by_video_summary_uuid(db, video_summary_uuid)
-            return knowledge_graphs
+
 
     @staticmethod
     async def get_depth(*, uuid: str = None) -> int:
@@ -108,11 +94,8 @@ class KnowledgeGraphService:
     @staticmethod
     async def extract(
             *,
-            file_paths: list[str],
-            schema: GetSchemaGraphDetail,
-            api_key: str,
-            base_url: str,
-            model: str,
+            text_data: str,
+            schema: GetSchemaGraphDetail
     ) -> List[KnowledgeGraph]:
         async with KnowledgeGraphService._lock:  # 使用异步锁确保同一时间只有一个请求被发送
 
@@ -149,33 +132,12 @@ class KnowledgeGraphService:
                 formed_schema_definition[target_entity.name] = target_entity.definition
                 formed_schema.append(schema_entry)
 
-            # 创建临时目录
-            request_temp_dir = os.path.join(PERMANENT_TEMP_DIR, str(uuid4()))
-            os.makedirs(request_temp_dir, exist_ok=True)
-
-            # 拷贝文件到临时目录
-            try:
-                for file_path in file_paths:
-                    filename = os.path.basename(file_path)
-                    temp_path = os.path.join(request_temp_dir, filename)
-                    # 确保路径格式正确，处理相对路径
-                    if file_path.startswith('./'):
-                        relative_file_path = os.path.normpath(file_path[2:])  # 移除 './' 前缀
-                    else:
-                        relative_file_path = os.path.normpath(file_path)
-                    shutil.copy(relative_file_path, temp_path)
-
-                # 调用内部服务函数
-                api_result = await create_kg(
-                    kg_schema=formed_schema,
-                    documents_dir_path=request_temp_dir,
-                    schema_definition=formed_schema_definition,
-                    api_key=api_key,
-                    base_url=base_url,
-                    model=model,
-                )
-            finally:
-                shutil.rmtree(request_temp_dir)
+            # 调用内部服务函数
+            api_result = await create_kg(
+                kg_schema=formed_schema,
+                text_data=text_data,
+                schema_definition=formed_schema_definition,
+            )
 
             return api_result
 
@@ -185,9 +147,6 @@ class KnowledgeGraphService:
             *,
             knowledge_graph: GetIndexDetail,
             level: int,
-            api_key: str,
-            base_url: str,
-            model: str
     ):
         entities = [entity.to_dict() for entity in knowledge_graph.entities]
         relationships = [relationship.to_dict() for relationship in knowledge_graph.relationships]
@@ -197,9 +156,6 @@ class KnowledgeGraphService:
                 entities=entities,
                 relationships=relationships,
                 level=level - 1,
-                api_key=api_key,
-                base_url=base_url,
-                model=model,
             )
             return {"entities": entities, "community_reports": community_reports}
 
@@ -212,11 +168,8 @@ class KnowledgeGraphService:
             *,
             knowledge_graph: GetIndexDetail,
             query: str,
-            infer: bool = False,
-            depth: int = 0,
-            api_key: str,
-            base_url: str,
-            model: str):
+            infer: bool,
+            depth: int):
         entities = [entity.to_dict() for entity in knowledge_graph.entities]
         relationships = [relationship.to_dict() for relationship in knowledge_graph.relationships]
         communities = [relationship.to_dict() for relationship in knowledge_graph.communities]
@@ -247,9 +200,6 @@ class KnowledgeGraphService:
                 community_reports=load_community(df=pd.DataFrame(community_reports)),
                 level=int(depth) - 1,
                 infer=infer,
-                api_key=api_key,
-                base_url=base_url,
-                model=model
             )
             return {"results": results, "context_text": context_text, "context_data": context_data}
 
