@@ -3,7 +3,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.exceptions import RequestValidationError
 from backend.core.config import settings
 from backend.core.logging import logger
@@ -30,17 +29,6 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"数据库表创建失败: {e}")
 
-    # 创建上传目录
-    import os
-    if not os.path.exists("backend/uploads"):
-        os.makedirs("backend/uploads")
-        logger.info(f"创建上传目录: ./uploads")
-
-    # 创建日志目录
-    if not os.path.exists("backend/logs"):
-        os.makedirs("backend/logs")
-        logger.info(f"创建日志目录: ./logs")
-
     logger.info("应用启动完成")
     yield
 
@@ -66,18 +54,18 @@ def create_app() -> FastAPI:
     # 添加CORS中间件
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000", "http://localhost:8080"],
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
 
-    # 添加可信主机中间件
-    if not settings.debug:
-        app.add_middleware(
-            TrustedHostMiddleware,
-            allowed_hosts=["localhost", "127.0.0.1", settings.host]
-        )
+    # # 添加可信主机中间件
+    # if not settings.debug:
+    #     app.add_middleware(
+    #         TrustedHostMiddleware,
+    #         allowed_hosts=["localhost", "127.0.0.1", settings.host]
+    #     )
 
     # 注册异常处理器
     app.add_exception_handler(HTTPException, custom_http_exception_handler)

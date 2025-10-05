@@ -15,7 +15,7 @@ class DialogueProcessor:
         self.sem = asyncio.Semaphore(15)
 
     @staticmethod
-    def chunk_with_overlap(dialogue, chunk_size=100, overlap=5):
+    def chunk_with_overlap(dialogue, chunk_size=50 , overlap=5):
         step = chunk_size - overlap
         return [dialogue[i:i + chunk_size] for i in range(0, len(dialogue), step)]
 

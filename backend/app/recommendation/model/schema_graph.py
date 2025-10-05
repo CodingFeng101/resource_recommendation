@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from sqlalchemy import String, Text
+from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from backend.app.recommendation.model.base import uuid4_str
@@ -19,7 +20,7 @@ class SchemaGraph(Base):
     aim: Mapped[str | None] = mapped_column(Text, default=None, comment='目标描述')
     modify_info: Mapped[str | None] = mapped_column(Text, default=None, comment='修改信息')
     modify_suggestion: Mapped[str | None] = mapped_column(Text, default=None, comment='修改建议')
-    text_data: Mapped[str | None] = mapped_column(Text, default=None, comment='种子文本')
+    text_data: Mapped[str | None] = mapped_column(LONGTEXT, default=None, comment='种子文本')
 
     entities: Mapped[list['SchemaEntity']] = relationship(
         'SchemaEntity',

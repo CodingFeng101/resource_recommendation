@@ -7,7 +7,6 @@ import asyncio
 from backend.app.recommendation.crud.crud_schema_graph import schema_graph_dao
 from backend.app.recommendation.model import SchemaGraph
 from backend.app.recommendation.schema.schema_graph import SchemaGraphBase, UpdateSchemaGraphBase
-from backend.common.core.unigraph.interface.kgschema_service import create_schema
 from backend.common.exception.exception import errors
 from backend.database.db_mysql import async_db_session
 
@@ -75,20 +74,6 @@ class SchemaGraphService:
             if not schema_graphs:
                 return []
             return schema_graphs
-
-
-    @staticmethod
-    async def create_schema(
-            *,
-            aim: str = None,
-            text_data: str = None,
-    ):
-        async with SchemaGraphService._lock:
-            schema, definition = await create_schema(
-                aim=aim,
-                text_data=text_data
-            )
-            return schema, definition
 
 
 

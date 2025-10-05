@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
+# *.so  # 注释掉，允许编译后的 .so 文件进入容器
 .Python
 build/
 develop-eggs/

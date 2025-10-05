@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-from typing import List
 import asyncio
 import pandas as pd
 
@@ -10,10 +9,9 @@ from fastapi import HTTPException
 
 from backend.app.recommendation.crud.crud_knowledge_graph import knowledge_graph_dao
 from backend.app.recommendation.model import KnowledgeGraph
-from backend.app.recommendation.schema import GetSchemaGraphDetail, GetIndexDetail
+from backend.app.recommendation.schema import GetIndexDetail
 from backend.app.recommendation.schema.knowledge_graph import KnowledgeGraphBase, UpdateKnowledgeGraphParam
-from backend.common.core.unigraph.interface.kg_services import create_kg
-from backend.common.core.unigraph.interface.query_service import build_index, query_kg
+from backend.common.core.unigraph.interface.query_service import query_kg
 from backend.common.core.unigraph.implementation.module.sapperrag.model.model_load import load_entities, load_community, \
     load_relationships
 from backend.common.core.unigraph.implementation.module.sapperrag.utils import parse_json
@@ -90,78 +88,6 @@ class KnowledgeGraphService:
             if not knowledge_graphs:
                 return []
             return knowledge_graphs
-
-    @staticmethod
-    async def extract(
-            *,
-            text_data: str,
-            schema: GetSchemaGraphDetail
-    ) -> List[KnowledgeGraph]:
-        async with KnowledgeGraphService._lock:  # 使用异步锁确保同一时间只有一个请求被发送
-
-            entities = schema.entities
-            relationships = schema.relationships
-            entity_map = {entity.uuid: entity for entity in entities}
-
-            formed_schema = []
-            formed_schema_definition = {}
-
-            for relationship in relationships:
-                source_entity = entity_map.get(relationship.source_entity_uuid)
-                target_entity = entity_map.get(relationship.target_entity_uuid)
-
-                if not source_entity or not target_entity:
-                    continue
-
-                schema_entry = {
-                    "schema": {
-                        "DirectionalEntityType": {
-                            "Name": source_entity.name,
-                            "Attributes": source_entity.attributes
-                        },
-                        "RelationType": relationship.name,
-                        "DirectedEntityType": {
-                            "Name": target_entity.name,
-                            "Attributes": target_entity.attributes
-                        }
-                    }
-                }
-
-                formed_schema_definition[relationship.name] = relationship.definition
-                formed_schema_definition[source_entity.name] = source_entity.definition
-                formed_schema_definition[target_entity.name] = target_entity.definition
-                formed_schema.append(schema_entry)
-
-            # 调用内部服务函数
-            api_result = await create_kg(
-                kg_schema=formed_schema,
-                text_data=text_data,
-                schema_definition=formed_schema_definition,
-            )
-
-            return api_result
-
-
-    @staticmethod
-    async def build_index(
-            *,
-            knowledge_graph: GetIndexDetail,
-            level: int,
-    ):
-        entities = [entity.to_dict() for entity in knowledge_graph.entities]
-        relationships = [relationship.to_dict() for relationship in knowledge_graph.relationships]
-
-        try:
-            entities, community_reports = await build_index(
-                entities=entities,
-                relationships=relationships,
-                level=level - 1,
-            )
-            return {"entities": entities, "community_reports": community_reports}
-
-        except Exception as e:
-            logger.error(f"An error occurred: {str(e)}", exc_info=True)
-            raise HTTPException(status_code=500, detail=str(e))
 
     @staticmethod
     async def query(
