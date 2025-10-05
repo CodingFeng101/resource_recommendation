@@ -27,15 +27,17 @@ class SchemaConstruction:
             text_data: str,
             directional_suggestion: str,
     ) -> object:
-        filter_chunks = DialogueProcessor.chunk_with_overlap(dialogue=json.loads(text_data).get("dialogue", "no context"))
-        print(filter_chunks)
-        for chunk in filter_chunks:
-            await self.extract_kg_schema(
-                text=chunk,
-                aim=aim,
-                directional_suggestion=directional_suggestion,
-                language="Chinese",
-            )
+        text_data_list = json.loads(text_data)
+        for dialogue in text_data_list:
+            filter_chunks = DialogueProcessor.chunk_with_overlap(dialogue=dialogue.get("identification_result", "no context"))
+            print(filter_chunks)
+            for chunk in filter_chunks:
+                await self.extract_kg_schema(
+                    text=chunk,
+                    aim=aim,
+                    directional_suggestion=directional_suggestion,
+                    language="Chinese",
+                )
         # 对schema中的元素进行去重
         self.kg_schema = deduplicate_schema(self.kg_schema)
         # 过滤掉 source 为空字典的元素

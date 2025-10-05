@@ -104,7 +104,7 @@ LABEL_GENERATION = """
         - "learning_style_preference": string (讲解型课堂视频 / 动画演示型 / 情境化案例型)
         - "knowledge_level_self_assessment": string (不熟悉 / 一般 / 熟练)
     ContentRules:
-        - Summaries must be concise and not copy topics verbatim.
+        - The summary only talks about what knowledge points are mainly discussed in this lesson, do not output "this lesson has been taught", just output the corresponding knowledge points directly.
         - Choose the most suitable label for each of the three fields based on the topics.
     Language: All output values must be in Simplified Chinese.
 [END_CONSTRAINTS]
@@ -134,7 +134,7 @@ LABEL_GENERATION = """
             inputs: { segment_topic_list: ["分数加法的基本概念", "分数加法的计算步骤", "常见错误与纠正方法"] },
             expected-outputs: { JSONTags:
 {
-    "class_summary": "本节课介绍了分数加法的概念与运算方法，并强调了常见易错点及其纠正。",
+    "class_summary": "分数加法的概念与运算方法，并强调了常见易错点及其纠正。",
     "learning_objectives": "课内巩固",
     "learning_style_preference": "讲解型课堂视频",
     "knowledge_level_self_assessment": "一般"

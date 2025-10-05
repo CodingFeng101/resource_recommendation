@@ -16,7 +16,6 @@ class SemanticKGConstructor:
         self.kg_schema = self._convert_schema2old_format(kg_schema)
         # self.kg_schema = kg_schema
         self.schema_definition = schema_definition
-        self.file_loader = FileLoader()
         self.ai_executor = AIExecutor()
 
     @staticmethod

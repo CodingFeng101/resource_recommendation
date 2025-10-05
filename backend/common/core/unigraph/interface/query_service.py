@@ -56,7 +56,5 @@ async def query_kg(query: str,
     context_builder = LocalSearchMixedContext(entities, relationships, community_reports)
     search_engine = LocalSearch(context_builder, LOCAL_SEARCH_SYSTEM_PROMPT)
     logger.info("搜索器初始化成功😊")
-    results = await search_engine.search(query, level, infer)
-    logger.info(f"上下文:{results}😊")
-
+    await search_engine.search(query, level, infer)
     return search_engine.context_text, search_engine.context_data

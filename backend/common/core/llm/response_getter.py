@@ -167,20 +167,22 @@ class ResponseGetterFactory:
         return GenericResponseGetter()
 
 async def main():
-    query1 = "Quantum physics explains particle behavior."
+    query1 = "hello."
     query2 = "My cat is sleeping under the warm blanket."
     embedding_llm = GenericResponseGetter()
-    vector1 = await embedding_llm.get_vector(query1)
-    vector2 = await embedding_llm.get_vector(query2)
-    print(vector1)
-    print(vector2)
-    # 计算余弦相似度
-    # 假设 vector1 和 vector2 是一维向量
-    v1 = np.array(vector1).reshape(1, -1)
-    v2 = np.array(vector2).reshape(1, -1)
-
-    similarity = cosine_similarity(v1, v2)[0][0]
-    print(f"余弦相似度: {similarity}")
+    answer = await embedding_llm.get_response(query1)
+    print(answer)
+    # vector1 = await embedding_llm.get_vector(query1)
+    # vector2 = await embedding_llm.get_vector(query2)
+    # print(vector1)
+    # print(vector2)
+    # # 计算余弦相似度
+    # # 假设 vector1 和 vector2 是一维向量
+    # v1 = np.array(vector1).reshape(1, -1)
+    # v2 = np.array(vector2).reshape(1, -1)
+    #
+    # similarity = cosine_similarity(v1, v2)[0][0]
+    # print(f"余弦相似度: {similarity}")
 
 
 if __name__ == "__main__":

@@ -162,7 +162,7 @@ async def create_knowledge_graph(
     obj_dict = obj_data
     obj = AddKnowledgeGraphParam(**obj_dict)
     for item in text_data:
-        obj.data.course_id = item.get('course_id')
+        obj.data.course_id = item.get('id')
         obj.data.name = item.get('book_name')
         knowledge_uuid = await knowledge_graph_service.add(obj=obj.data)
 
@@ -172,7 +172,7 @@ async def create_knowledge_graph(
 
         # 执行提取任务
         knowledge_graph_data_all = await knowledge_graph_service.extract(
-            text_data=item.get("dialogue", "no context"),
+            text_data=item.get("identification_result", "no context"),
             schema=schema_data,
         )
 
@@ -335,6 +335,3 @@ async def ask_knowledge_graph(course_id: Annotated[str, Path(...)],
         return response_base.success(data=response)
      except Exception as e:
          logger.error(f"获取知识图谱列表失败: {str(e)}", exc_info=True)
-
-
-

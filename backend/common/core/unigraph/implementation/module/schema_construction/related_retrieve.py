@@ -19,9 +19,7 @@ async def batch_get_vectors(words: List[str]) -> Dict[str, List[float]]:
     # 为每个单词创建获取向量的异步任务
     tasks = [
         GenericResponseGetter.get_vector(
-            query=word,
-            api_key="sk-CRj8WW9b6iNIsqqcB5F7Ce9d7e1c431b8e29Ea634aAa4e87",
-            base_url="https://api.rcouyi.com/v1"
+            query=word
         )
         for word in words
     ]

@@ -21,18 +21,18 @@ async def extract_entities_from_query(query, llm, max_retries=3) -> Any:
     :param max_retries: 最大重试次数
     :return: 抽取的实体列表
     """
-    extract_prompt = EXTRACT_ENTITIES_FROM_QUERY.render(query=query)
-
-    for attempt in range(max_retries):
-        try:
-            extract_entities = await llm.get_response(query=extract_prompt)
-            logger.debug(f"尝试 {attempt}: LLM 返回的响应 - {extract_entities}")
-            extract_entities_list = json.loads(extract_entities)
-            return extract_entities_list
-        except json.JSONDecodeError as e:
-            logger.error(f"尝试 {attempt}: 解析 JSON 响应失败 - {e}")
-            if attempt < max_retries - 1:
-                continue
+    # extract_prompt = EXTRACT_ENTITIES_FROM_QUERY.render(query=query)
+    #
+    # for attempt in range(max_retries):
+    #     try:
+    #         extract_entities = await llm.get_response(query=extract_prompt)
+    #         logger.debug(f"尝试 {attempt}: LLM 返回的响应 - {extract_entities}")
+    #         extract_entities_list = json.loads(extract_entities)
+    #         return extract_entities_list
+    #     except json.JSONDecodeError as e:
+    #         logger.error(f"尝试 {attempt}: 解析 JSON 响应失败 - {e}")
+    #         if attempt < max_retries - 1:
+    #             continue
     return [f"{query}"]
 
 
