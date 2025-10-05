@@ -143,7 +143,7 @@ backend/
 **1. 克隆项目**
 ```bash
 git clone [项目地址]
-cd resource_recommendation/backend
+cd resource_recommendation/backend_temp
 ```
 
 **2. 配置环境变量**
@@ -161,7 +161,7 @@ docker-compose up -d
 docker-compose ps
 
 # 查看日志
-docker-compose logs -f backend
+docker-compose logs -f backend_temp
 ```
 
 **4. 验证部署**
@@ -186,7 +186,7 @@ open http://localhost:8000/docs
 **1. 克隆项目**
 ```bash
 git clone [项目地址]
-cd resource_recommendation/backend
+cd resource_recommendation/backend_temp
 ```
 
 **2. 创建虚拟环境**
@@ -252,7 +252,7 @@ docker-compose up -d
 docker-compose up -d --build
 
 # 指定服务启动
-docker-compose up -d backend
+docker-compose up -d backend_temp
 ```
 
 **查看状态**
@@ -264,7 +264,7 @@ docker-compose ps
 docker-compose logs -f
 
 # 查看特定服务日志
-docker-compose logs -f backend
+docker-compose logs -f backend_temp
 ```
 
 **维护操作**
@@ -276,10 +276,10 @@ docker-compose down
 docker-compose down -v
 
 # 进入容器
-docker-compose exec backend sh
+docker-compose exec backend_temp sh
 
 # 查看容器内部文件
-docker-compose exec backend ls -la /app/backend/
+docker-compose exec backend_temp ls -la /app/backend_temp/
 ```
 
 ### 故障排查

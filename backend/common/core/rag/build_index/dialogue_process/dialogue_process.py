@@ -4,8 +4,8 @@ from jinja2 import Template
 
 from tqdm import tqdm
 
-from backend.common.llm.response_getter import GenericResponseGetter
-from backend.common.utils import clean_json_output
+from backend.common.clean import clean_json_output
+from backend.common.core.llm.response_getter import GenericResponseGetter
 from .prompt import REPORT_GENERATION, LABEL_GENERATION
 
 
@@ -15,7 +15,7 @@ class DialogueProcessor:
         self.sem = asyncio.Semaphore(15)
 
     @staticmethod
-    def chunk_with_overlap(dialogue, chunk_size=20, overlap=5):
+    def chunk_with_overlap(dialogue, chunk_size=100, overlap=5):
         step = chunk_size - overlap
         return [dialogue[i:i + chunk_size] for i in range(0, len(dialogue), step)]
 

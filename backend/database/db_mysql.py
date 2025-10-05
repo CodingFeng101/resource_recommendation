@@ -1,60 +1,62 @@
-#!/usr/bin/env python3
+#!/usr/bin/.env python3
 # -*- coding: utf-8 -*-
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+import sys
 
-from backend.app.recommendation.model import Base
+from typing import Annotated
+from uuid import uuid4
+
+from fastapi import Depends
+from sqlalchemy import URL
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from backend.common.log import log
+from backend.common.model import MappedBase
 from backend.core.config import settings
 
-# 异步数据库引擎（MySQL）
-async_engine = create_async_engine(
-    settings.database_url,
-    echo=settings.debug,
-    pool_pre_ping=True,
-    pool_recycle=300,
-    connect_args={"ssl": False},  # 禁用SSL连接
-)
 
-# 异步会话工厂
-async_db_session = async_sessionmaker(
-    bind=async_engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autoflush=False,
-    autocommit=False,
-)
-
-# 同步数据库引擎（用于创建表等操作）
-sync_engine = create_engine(
-    settings.database_url.replace("mysql+asyncmy://", "mysql+pymysql://"),
-    echo=settings.debug,
-    pool_pre_ping=True,
-    pool_recycle=300,
-)
-
-# 同步会话工厂
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
-
-# 创建所有表
-async def create_tables():
-    """创建数据库表"""
-    async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-# 依赖注入函数
-async def get_async_db():
-    """获取异步数据库会话"""
-    async with async_db_session() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
-
-def get_db():
-    """获取同步数据库会话"""
-    db = SessionLocal()
+def create_engine_and_session(url: str | URL):
     try:
-        yield db
+        # 数据库引擎
+        engine = create_async_engine(url, future=True, pool_pre_ping=True)
+        # log.success('数据库连接成功')
+    except Exception as e:
+        log.error('❌ 数据库链接失败 {}', e)
+        sys.exit()
+    else:
+        db_session = async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+        return engine, db_session
+
+
+SQLALCHEMY_DATABASE_URL = (
+    f'mysql+asyncmy://{settings.MYSQL_USER}:{settings.MYSQL_PASSWORD}@{settings.MYSQL_HOST}:'
+    f'{settings.MYSQL_PORT}/{settings.MYSQL_DATABASE}?charset={settings.MYSQL_CHARSET}'
+)
+
+async_engine, async_db_session = create_engine_and_session(SQLALCHEMY_DATABASE_URL)
+
+
+async def get_db() -> AsyncSession:
+    """session 生成器"""
+    session = async_db_session()
+    try:
+        yield session
+    except Exception as se:
+        await session.rollback()
+        raise se
     finally:
-        db.close()
+        await session.close()
+
+
+# Session Annotated
+CurrentSession = Annotated[AsyncSession, Depends(get_db)]
+
+
+async def create_table():
+    """创建数据库表"""
+    async with async_engine.begin() as coon:
+        await coon.run_sync(MappedBase.metadata.create_all)
+
+
+def uuid4_str() -> str:
+    """数据库引擎 UUID 类型兼容性解决方案"""
+    return str(uuid4())

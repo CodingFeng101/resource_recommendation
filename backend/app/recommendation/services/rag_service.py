@@ -11,10 +11,9 @@ from backend.app.recommendation.crud.summary_embedding import summary_embedding_
 from backend.app.recommendation.crud.video_summary import video_summary_dao
 from backend.app.recommendation.schema import CourseCreate, CourseUpdate, VideoSummaryCreate, SummaryEmbeddingCreate, \
     ReportCreate, ReportEmbeddingCreate
+from backend.common.core.llm.response_getter import GenericResponseGetter
 from backend.common.core.rag.build_index.dialogue_process.dialogue_process import DialogueProcessor
-from backend.common.exception.exception import errors
 from backend.database.db_mysql import async_db_session
-from backend.common.llm.response_getter import GenericResponseGetter
 import json
 import numpy as np
 
@@ -66,19 +65,23 @@ class RagService:
 
     async def _process_single_course(self, item: Dict[str, Any]) -> None:
         """处理单个课程数据"""
-        course_id = item.get("course_id")
-        resource_name = item.get("resource_name")
-        file_name = item.get("file_name")
-        grade = item.get("grade")
-        subject = item.get("subject")
-        video_link = item.get("video_link")
-        dialogue = item.get("dialogue", [])
+        course_id = item.get("id")
+        resource_name = item.get("class_name")
+        version = item.get("version", "")
+        book_name = item.get("book_name", "")
+        chapter_name = item.get("chapter_name", "")
+        grade = item.get("level")
+        subject = item.get("disciplines")
+        video_link = item.get("down_url")
+        dialogue = item.get("identification_result", [])
 
         async with async_db_session.begin() as db:
             course_create = CourseCreate(
                 course_id=course_id,
                 resource_name=resource_name,
-                file_name=file_name,
+                version=version,
+                book_name=book_name,
+                chapter_name=chapter_name,
                 grade=grade,
                 subject=subject,
                 video_link=video_link,
@@ -175,7 +178,7 @@ class RagService:
                 return []
             
             similarities = []
-            similarity_threshold = 0.7
+            similarity_threshold = 0
             # 3. 计算每个summary与查询的相似度
             for embedding in all_embeddings:
                 try:
@@ -268,7 +271,9 @@ class RagService:
                         "course_uuid": course.uuid,
                         "course_id": course.course_id,
                         "resource_name": course.resource_name,
-                        "file_name": course.file_name,
+                        "version": course.version,
+                        "book_name": course.book_name,
+                        "chapter_name": course.chapter_name,
                         "grade": course.grade,
                         "subject": course.subject,
                         "video_link": course.video_link,
@@ -319,7 +324,7 @@ class RagService:
                 return []
             
             similarities = []
-            similarity_threshold = 0.7
+            similarity_threshold = 0
             # 4. 计算每个报告的embedding与查询的相似度
             for report in reports:
                 # 获取对应的report_embedding
