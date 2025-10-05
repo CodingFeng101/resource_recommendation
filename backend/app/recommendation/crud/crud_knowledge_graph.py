@@ -91,27 +91,6 @@ class CRUDKnowledgeGraph(CRUDPlus[KnowledgeGraph]):
         """
         return await self.delete_model(db, knowledge_graph_id)
 
-    async def get_list(self, db: AsyncSession, *, kg_base_uuid: str, name: str = None) -> list[KnowledgeGraph]:
-        """
-        获取架构图谱列表
-
-        :param db:
-        :param kg_base_uuid:
-        :param name: 架构图谱名称（模糊查询）
-        :return: 返回 SQL 查询语句
-        """
-        stmt = (select(self.model).order_by(self.model.created_time)
-                )
-        where_list = [self.model.kg_base_uuid == kg_base_uuid]
-        if name:
-            where_list.append(self.model.name.like(f'%{name}%'))
-        if where_list:
-            stmt = stmt.where(and_(*where_list))
-
-        knowledge_graph = await db.execute(stmt)
-
-        return knowledge_graph.scalars().all()
-
     async def get_with_relation(self, db: AsyncSession, *, uuid: str = None, name: str = None) -> KnowledgeGraph | None:
         """
         :param uuid:
@@ -196,16 +175,16 @@ class CRUDKnowledgeGraph(CRUDPlus[KnowledgeGraph]):
         """
         return await self.update_model(db, knowledge_graph_id, {'cover_image': cover_image})
 
-    async def get_all_uuids(self, db: AsyncSession) -> list[str]:
+    async def get_all_uuid_dict(self, db: AsyncSession) -> dict[str, str]:
         """
-        获取 knowledge_graph 表中所有的 uuid
+        获取 knowledge_graph 表中所有的 uuid 和 course_id 映射
 
         :param db: 异步数据库会话
-        :return: uuid 列表
+        :return: uuid 和 course_id 的字典映射
         """
-        stmt = select(self.model.uuid)
+        stmt = select(self.model.uuid, self.model.course_id)
         result = await db.execute(stmt)
-        return [row[0] for row in result.all()]
+        return {row[0]: row[1] for row in result.all()}
 
 
 # 实例化 CRUD 对象

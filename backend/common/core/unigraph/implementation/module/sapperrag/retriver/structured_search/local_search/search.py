@@ -41,9 +41,3 @@ class LocalSearch(BaseSearch):
         # 执行搜索操作
         self.context_text = context_text
         self.context_data = {key: value.to_dict() for key, value in context_data.items()}
-        search_prompt = self.system_prompt.format(
-            context_data=context_text, query=query, response_type="plain"
-        )
-        results = await llm.get_response(query=search_prompt)
-        logger.info(f"搜索结果{results}获取成功😊")
-        return results

@@ -59,4 +59,4 @@ async def query_kg(query: str,
     results = await search_engine.search(query, level, infer)
     logger.info(f"上下文:{results}😊")
 
-    return results, search_engine.context_text, search_engine.context_data
+    return search_engine.context_text, search_engine.context_data

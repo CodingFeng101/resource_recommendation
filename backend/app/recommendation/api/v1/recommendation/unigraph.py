@@ -163,7 +163,7 @@ async def create_knowledge_graph(
     obj = AddKnowledgeGraphParam(**obj_dict)
     for item in text_data:
         obj.data.course_id = item.get('course_id')
-        obj.data.name = item.get('file_name')
+        obj.data.name = item.get('book_name')
         knowledge_uuid = await knowledge_graph_service.add(obj=obj.data)
 
         # 获取模式图谱数据
@@ -255,68 +255,68 @@ async def create_knowledge_graph(
 
 @router.post('/build-index', summary="构建索引")
 async def build_index():
-    try:
-    # 获取用户信息和知识图谱
-        async with async_db_session.begin() as db:
-            uuid_list = await knowledge_graph_dao.get_all_uuids(db)
-        for uuid in uuid_list:
-            knowledge_graph = await knowledge_graph_service.get_knowledge_graph(uuid=uuid)
-            data = GetIndexDetail(**select_as_dict(knowledge_graph))
+    # try:
+# 获取用户信息和知识图谱
+    async with async_db_session.begin() as db:
+        uuid_dict = await knowledge_graph_dao.get_all_uuid_dict(db)
+    for uuid, course_id in uuid_dict.items():
+        knowledge_graph = await knowledge_graph_service.get_knowledge_graph(uuid=course_id)
+        data = GetIndexDetail(**select_as_dict(knowledge_graph))
 
-            # 执行构建索引任务
-            index_result = await knowledge_graph_service.build_index(
-                knowledge_graph=data,
-                level=1,
+        # 执行构建索引任务z
+        index_result = await knowledge_graph_service.build_index(
+            knowledge_graph=data,
+            level=1,
+        )
+
+        # 处理索引结果
+        entities = index_result.get("entities", [])
+        community_reports = index_result.get('community_reports', [])
+        triple_community_hash_table = {}
+
+        # 删除旧的社区数据
+        await community_service.delete_all(knowledge_graph_uuid=uuid)
+
+        # 添加社区数据
+        for item in community_reports:
+            community_uuid = await community_service.add(
+                obj=AddCommunityParam(
+                    title=item.get('title', ''),
+                    content=item.get('full_content', ''),
+                    level=str(item.get('level', '')),
+                    rating=str(item.get('rating', '')),
+                    attributes=item.get('attributes', ''),
+                    knowledge_graph_uuid=uuid
+                )
             )
+            triple_community_hash_table[item["id"]] = community_uuid
 
-            # 处理索引结果
-            entities = index_result.get("entities", [])
-            community_reports = index_result.get('community_reports', [])
-            triple_community_hash_table = {}
-
-            # 删除旧的社区数据
-            await community_service.delete_all(knowledge_graph_uuid=uuid)
-
-            # 添加社区数据
-            for item in community_reports:
-                community_uuid = await community_service.add(
-                    obj=AddCommunityParam(
-                        title=item.get('title', ''),
-                        content=item.get('full_content', ''),
-                        level=str(item.get('level', '')),
-                        rating=str(item.get('rating', '')),
-                        attributes=item.get('attributes', ''),
-                        knowledge_graph_uuid=uuid
-                    )
+        # 添加实体和嵌入数据
+        for entity in entities:
+            entity_uuid = entity.get('id')
+            vector = entity.get('attributes_embedding')
+            await embedding_service.add(
+                obj=EmbeddingBase(
+                    knowledge_entity_uuid=entity_uuid,
+                    vector=json.dumps(vector)
                 )
-                triple_community_hash_table[item["id"]] = community_uuid
-
-            # 添加实体和嵌入数据
-            for entity in entities:
-                entity_uuid = entity.get('id')
-                vector = entity.get('attributes_embedding')
-                await embedding_service.add(
-                    obj=EmbeddingBase(
+            )
+            entity_community = []
+            if entity.get('community_ids', '{}'):
+                entity_community = json.loads(json.dumps(entity.get('community_ids', '[]')))
+            for community in entity_community:
+                community_uuid = triple_community_hash_table.get(community, None)
+                if community_uuid:
+                    await knowledge_entity_service.add_community_relation(
                         knowledge_entity_uuid=entity_uuid,
-                        vector=json.dumps(vector)
+                        community_uuid=community_uuid
                     )
-                )
-                entity_community = []
-                if entity.get('community_ids', '{}'):
-                    entity_community = json.loads(json.dumps(entity.get('community_ids', '[]')))
-                for community in entity_community:
-                    community_uuid = triple_community_hash_table.get(community, None)
-                    if community_uuid:
-                        await knowledge_entity_service.add_community_relation(
-                            knowledge_entity_uuid=entity_uuid,
-                            community_uuid=community_uuid
-                        )
 
-        return response_base.success(data={"results": "成功构建索引"})
+    return response_base.success(data={"results": "成功构建索引"})
 
-    except Exception as e:
-        logger.error(f"构建索引失败: {str(e)}")
-        return response_base.fail(message=f"任务失败, 请检查API账户并稍后重试: {str(e)}")
+    # except Exception as e:
+    #     logger.error(f"构建索引失败: {str(e)}")
+    #     return response_base.fail(message=f"任务失败, 请检查API账户并稍后重试: {str(e)}")
 
 
 @router.post('/ask/{course_id}', summary='基于索引进行问答')
@@ -335,4 +335,6 @@ async def ask_knowledge_graph(course_id: Annotated[str, Path(...)],
         return response_base.success(data=response)
      except Exception as e:
          logger.error(f"获取知识图谱列表失败: {str(e)}", exc_info=True)
+
+
 

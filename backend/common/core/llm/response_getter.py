@@ -3,7 +3,9 @@ import json
 from typing import List
 
 import aiohttp
+import numpy as np
 from openai import AsyncOpenAI
+from sklearn.metrics.pairwise import cosine_similarity
 
 from backend.common.core.llm.base import ResponseGetter
 
@@ -66,7 +68,7 @@ class GenericResponseGetter(ResponseGetter):
             query: str,
             # api_key: str = "sk-CRj8WW9b6iNIsqqcB5F7Ce9d7e1c431b8e29Ea634aAa4e87",
             # base_url: str = "https://api.rcouyi.com/v1",
-            api_key: str = "sk-CRj8WW9b6iNIsqqcB5F7Ce9d7e1c431b8e29Ea634aAa4e87",
+            api_key: str = "sk-xkuiviuxwYIBnGek385201B95d85415eA5A17bCe99CfCbB6",
             base_url: str = "https://api.rcouyi.com/v1",
             model: str = "gpt-4.1",
             **kwargs
@@ -134,7 +136,7 @@ class GenericResponseGetter(ResponseGetter):
     async def get_vector(
             query: str,
             model: str = "text-embedding-3-small",
-            api_key: str = "sk-CRj8WW9b6iNIsqqcB5F7Ce9d7e1c431b8e29Ea634aAa4e87",
+            api_key: str = "sk-xkuiviuxwYIBnGek385201B95d85415eA5A17bCe99CfCbB6",
             base_url: str = "https://api.rcouyi.com/v1",
     ) -> list[float]:
         """
@@ -165,10 +167,21 @@ class ResponseGetterFactory:
         return GenericResponseGetter()
 
 async def main():
-    query = "讲解多边形的对称性和图形分类"
+    query1 = "Quantum physics explains particle behavior."
+    query2 = "My cat is sleeping under the warm blanket."
     embedding_llm = GenericResponseGetter()
-    vector = await embedding_llm.get_vector(query)
-    print(vector)
+    vector1 = await embedding_llm.get_vector(query1)
+    vector2 = await embedding_llm.get_vector(query2)
+    print(vector1)
+    print(vector2)
+    # 计算余弦相似度
+    # 假设 vector1 和 vector2 是一维向量
+    v1 = np.array(vector1).reshape(1, -1)
+    v2 = np.array(vector2).reshape(1, -1)
+
+    similarity = cosine_similarity(v1, v2)[0][0]
+    print(f"余弦相似度: {similarity}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

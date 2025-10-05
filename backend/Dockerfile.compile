@@ -1,0 +1,86 @@
+# 多阶段构建 - 编译阶段
+FROM python:3.11-slim as compiler
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装编译依赖
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    libc6-dev \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# 升级 pip 和安装编译工具
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir Cython numpy
+
+# 复制源代码
+COPY . .
+
+# 安装项目依赖
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 编译 Cython 扩展
+RUN python setup.py build_ext --inplace
+
+# 构建分发包
+RUN python setup.py bdist_wheel
+
+# 清理源代码，只保留编译后的文件和必要文件
+RUN find . -name "*.py" -not -path "./main.py" -not -path "./*/__init__.py" -not -path "./build/*" -not -path "./dist/*" -delete
+RUN find . -name "*.pyx" -delete
+RUN find . -name "*.c" -delete
+
+# 运行阶段
+FROM python:3.11-slim as runtime
+
+# 创建非 root 用户
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装运行时依赖
+RUN apt-get update && apt-get install -y \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 升级 pip
+RUN pip install --no-cache-dir --upgrade pip
+
+# 从编译阶段复制编译后的文件
+COPY --from=compiler /app/dist/*.whl /tmp/
+COPY --from=compiler /app/main.py /app/
+COPY --from=compiler /app/alembic.ini /app/
+COPY --from=compiler /app/sql/ /app/sql/
+COPY --from=compiler /app/data/ /app/data/
+COPY --from=compiler /app/temp_files/ /app/temp_files/
+
+# 复制编译后的 .so 文件和 __init__.py 文件
+COPY --from=compiler /app/app/ /app/app/
+COPY --from=compiler /app/common/ /app/common/
+COPY --from=compiler /app/core/ /app/core/
+COPY --from=compiler /app/database/ /app/database/
+COPY --from=compiler /app/utils/ /app/utils/
+
+# 安装编译后的包
+RUN pip install --no-cache-dir /tmp/*.whl
+
+# 创建日志目录
+RUN mkdir -p /app/logs && chown -R appuser:appuser /app
+
+# 切换到非 root 用户
+USER appuser
+
+# 暴露端口
+EXPOSE 8000
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health', timeout=10)"
+
+# 启动命令
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

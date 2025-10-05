@@ -4,7 +4,6 @@ from jinja2 import Template
 
 from backend.common.core.llm.response_getter import GenericResponseGetter
 from backend.common.core.rag.build_index.dialogue_process.dialogue_process import DialogueProcessor
-from backend.common.core.unigraph.implementation.file.file_loader import FileLoader
 from backend.common.core.unigraph.implementation.module.schema_construction.utils import deduplicate_schema, extract_definition, extract_triples_and_strings, get_new_entity_types_from_response, \
     merge_type_dicts_with_semantic, get_new_relationship_types_from_response, get_entity_type_attributes_from_response, \
     transform_triplets_to_schema
@@ -21,19 +20,6 @@ class SchemaConstruction:
     async def chatresponse(self, prompt):
         response = await GenericResponseGetter.get_response(query=prompt)
         return response
-
-    # 从各种文件中读取分割后的数据
-    @classmethod
-    def file_load(cls, file_path_list):
-        """
-        从各种类型的文件中读取文本
-        """
-        chunks = []
-        tool = FileLoader()
-        for file_path in file_path_list:
-            content = tool.load(file_path)
-            chunks.extend([chunk for chunk in content[0].values()])
-        return chunks
 
     async def extract_from_path(
             self,

@@ -193,7 +193,7 @@ class KnowledgeGraphService:
             community_reports = parse_json(json.dumps(communities), community_report_mapping)
             logger.info("数据解析完毕😀")
 
-            results, context_text, context_data = await query_kg(
+            context_text, context_data = await query_kg(
                 query=query,
                 entities=load_entities(df=pd.DataFrame(entities)),
                 relationships=load_relationships(df=pd.DataFrame(relationships)),
@@ -201,24 +201,11 @@ class KnowledgeGraphService:
                 level=int(depth) - 1,
                 infer=infer,
             )
-            return {"results": results, "context_text": context_text, "context_data": context_data}
+            return {"context_text": context_text, "context_data": context_data}
 
         except Exception as e:
             logger.error(f"An error occurred: {str(e)}", exc_info=True)
             raise HTTPException(status_code=500, detail=str(e))
-
-
-    @staticmethod
-    async def update_index_status(*, uuid: str, index_status: int) -> int:
-        async with async_db_session.begin() as db:
-            knowledge_graph = await knowledge_graph_dao.get_by_uuid(db, uuid)
-            if not knowledge_graph:
-                raise errors.NotFoundError(msg='图谱库不存在')
-
-            # 更新图谱库信息
-            count = await knowledge_graph_dao.update_status(db, knowledge_graph.id, index_status)
-            # await redis_client.delete(f'{settings.KG_BASE_REDIS_PREFIX}:{knowledge_graph.id}')
-            return count
 
 
 knowledge_graph_service = KnowledgeGraphService()

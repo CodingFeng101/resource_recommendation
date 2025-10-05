@@ -3,7 +3,6 @@ import os
 from typing import List, Dict, Tuple
 
 from backend.common.core.rag.build_index.dialogue_process.dialogue_process import DialogueProcessor
-from ..file.file_loader import FileLoader
 from ..ai_unit.executor.ai_executor import AIExecutor
 import asyncio
 from tqdm import tqdm

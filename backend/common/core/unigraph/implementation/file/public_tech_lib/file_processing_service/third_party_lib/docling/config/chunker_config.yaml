@@ -1,3 +1,0 @@
-semantic_chunker_config:
-  chunker_model: "sentence-transformers/all-MiniLM-L6-v2"
-  max_tokens: 64

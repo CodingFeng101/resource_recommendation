@@ -6,7 +6,9 @@ from datetime import datetime
 class CourseBase(BaseModel):
     course_id: str = Field(..., description="课程唯一标识")
     resource_name: str = Field(..., description="资源名称")
-    file_name: str = Field(..., description="文件名")
+    version: str = Field(..., description="版本")
+    book_name: str = Field(..., description="书名")
+    chapter_name: str = Field(..., description="章节名")
     grade: str = Field(..., description="年级")
     subject: str = Field(..., description="学科")
     video_link: Optional[str] = Field(None, description="视频链接")
@@ -20,6 +22,9 @@ class CourseCreate(CourseBase):
 
 class CourseUpdate(BaseModel):
     resource_name: Optional[str] = None
+    version: Optional[str] = None
+    book_name: Optional[str] = None
+    chapter_name: Optional[str] = None
     video_link: Optional[str] = None
     learning_objectives: Optional[str] = None
     learning_style_preference: Optional[str] = None
