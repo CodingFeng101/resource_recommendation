@@ -72,7 +72,7 @@ class RagService:
         chapter_name = item.get("chapter_name", "")
         grade = item.get("level")
         subject = item.get("disciplines")
-        video_link = item.get("down_url")
+        video_link = item.get("enter_view_url")
         dialogue = item.get("identification_result", [])
 
         async with async_db_session.begin() as db:
